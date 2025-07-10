@@ -17,7 +17,11 @@ function FormBarang() {
   });
 
   useEffect(() => {
-    if (!user) return window.location.href = '/';
+  const token = localStorage.getItem('token');
+  if (!token || !user) {
+    window.location.href = '/';
+    return;
+  }
 
     // Cek apakah ada data edit yang dikirim dari localStorage
     const editData = localStorage.getItem('editBarang');

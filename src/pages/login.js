@@ -11,16 +11,22 @@ function Login() {
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage('');
-    setError(false);
+        e.preventDefault();
+        setLoading(true);
+        setMessage('');
+        setError(false);
 
     try {
-        const res = await axios.post(`${process.env.REACT_APP_API}/auth/login`, form);
+        const res = await axios.post('/api/auth/login', form);
+
+      // ✅ Simpan token & user info ke localStorage
+        localStorage.setItem('token', res.data.token);
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+
         setMessage(res.data.message);
         setError(false);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
+
+      // ✅ Arahkan ke halaman utama setelah login berhasil
         setTimeout(() => navigate('/home'), 1000);
     } catch (err) {
         setError(true);
@@ -39,16 +45,27 @@ function Login() {
         </div>
         )}
         <form onSubmit={handleSubmit}>
-        <input type="email" placeholder="Email" value={form.email}
-            onChange={e => setForm({ ...form, email: e.target.value })} required />
+        <input
+            type="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={e => setForm({ ...form, email: e.target.value })}
+            required
+        />
 
-        <input type="password" placeholder="Password" value={form.password}
-            onChange={e => setForm({ ...form, password: e.target.value })} required />
+        <input
+            type="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={e => setForm({ ...form, password: e.target.value })}
+            required
+        />
 
         <button type="submit" disabled={loading}>Login</button>
         </form>
 
         {loading && <div className="loader">Memproses login...</div>}
+
         <p>Belum punya akun? <a href="/register">Daftar</a></p>
     </div>
     );

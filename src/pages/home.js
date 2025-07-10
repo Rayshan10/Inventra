@@ -17,9 +17,14 @@ function BarangList() {
   };
 
   useEffect(() => {
-    if (!user) return window.location.href = '/';
-    fetchBarang();
-  }, []);
+  const token = localStorage.getItem('token');
+  if (!token || !user) {
+    window.location.href = '/';
+    return;
+  }
+  fetchBarang();
+}, []);
+
 
   useEffect(() => {
     let filtered = barang;

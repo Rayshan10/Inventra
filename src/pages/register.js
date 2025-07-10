@@ -11,48 +11,69 @@ function Register() {
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage('');
-    setError(false);
-
-    try {
-        const res = await axios.post(`${process.env.REACT_APP_API}/auth/register`, form);
-        setMessage(res.data.message);
+        e.preventDefault();
+        setLoading(true);
+        setMessage('');
         setError(false);
-        setTimeout(() => navigate('/'), 1000);
-    } catch (err) {
-        setError(true);
-        setMessage(err.response?.data?.message || 'Registrasi gagal');
-    } finally {
-        setLoading(false);
-    }
+
+        try {
+            const res = await axios.post('/api/auth/register', form);
+            setMessage(res.data.message);
+            setError(false);
+
+            // ✅ Simpan email ke localStorage agar diisi otomatis di verifikasi
+            localStorage.setItem('pending_email', form.email);
+
+            // ✅ Arahkan user ke halaman verifikasi OTP
+            setTimeout(() => navigate('/verify'), 1000);
+        } catch (err) {
+            setError(true);
+            setMessage(err.response?.data?.message || 'Registrasi gagal');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-    <div>
-        <h2>Registrasi Akun</h2>
-        {message && (
-        <div className={`alert ${error ? 'alert-error' : 'alert-success'}`}>
-            {message}
+        <div>
+            <h2>Registrasi Akun</h2>
+            {message && (
+                <div className={`alert ${error ? 'alert-error' : 'alert-success'}`}>
+                    {message}
+                </div>
+            )}
+            <form onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    placeholder="Nama"
+                    value={form.nama}
+                    onChange={e => setForm({ ...form, nama: e.target.value })}
+                    required
+                />
+
+                <input
+                    type="email"
+                    placeholder="Email"
+                    value={form.email}
+                    onChange={e => setForm({ ...form, email: e.target.value })}
+                    required
+                />
+
+                <input
+                    type="password"
+                    placeholder="Password"
+                    value={form.password}
+                    onChange={e => setForm({ ...form, password: e.target.value })}
+                    required
+                />
+
+                <button type="submit" disabled={loading}>Daftar</button>
+            </form>
+
+            {loading && <div className="loader">Memproses registrasi...</div>}
+
+            <p>Sudah punya akun? <a href="/">Login</a></p>
         </div>
-        )}
-        <form onSubmit={handleSubmit}>
-        <input type="text" placeholder="Nama" value={form.nama}
-            onChange={e => setForm({ ...form, nama: e.target.value })} required />
-
-        <input type="email" placeholder="Email" value={form.email}
-            onChange={e => setForm({ ...form, email: e.target.value })} required />
-
-        <input type="password" placeholder="Password" value={form.password}
-            onChange={e => setForm({ ...form, password: e.target.value })} required />
-
-        <button type="submit" disabled={loading}>Daftar</button>
-        </form>
-
-        {loading && <div className="loader">Memproses registrasi...</div>}
-        <p>Sudah punya akun? <a href="/">Login</a></p>
-    </div>
     );
 }
 
