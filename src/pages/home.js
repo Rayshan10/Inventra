@@ -9,22 +9,30 @@ function BarangList() {
   const [filteredBarang, setFilteredBarang] = useState([]);
   const [search, setSearch] = useState('');
   const [kategoriFilter, setKategoriFilter] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const fetchBarang = async () => {
-    const res = await axios.get('/api/barang');
-    setBarang(res.data.data);
-    setFilteredBarang(res.data.data);
+    setLoading(true);
+    try {
+      const res = await axios.get('/api/barang');
+      setBarang(res.data.data);
+      setFilteredBarang(res.data.data);
+    } catch (err) {
+      console.error(err);
+      alert('Gagal memuat data barang');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-  const token = localStorage.getItem('token');
-  if (!token || !user) {
-    window.location.href = '/';
-    return;
-  }
-  fetchBarang();
-}, []);
-
+    const token = localStorage.getItem('token');
+    if (!token || !user) {
+      window.location.href = '/';
+      return;
+    }
+    fetchBarang();
+  }, [user]);
 
   useEffect(() => {
     let filtered = barang;
@@ -44,72 +52,109 @@ function BarangList() {
   }, [search, kategoriFilter, barang]);
 
   const handleDelete = async (id) => {
-    if (window.confirm('Yakin ingin menghapus barang ini?')) {
-      await axios.delete(`/api/barang/${id}`);
-      fetchBarang();
+    if (window.confirm('Apakah Anda yakin ingin menghapus barang ini?')) {
+      try {
+        await axios.delete(`/api/barang/${id}`);
+        fetchBarang();
+      } catch (err) {
+        console.error(err);
+        alert('Gagal menghapus barang');
+      }
     }
   };
 
   const handleEdit = (item) => {
     localStorage.setItem('editBarang', JSON.stringify(item));
-    window.location.href = '/barang'; // ganti ke /form jika halaman formmu di situ
+    window.location.href = '/barang';
   };
 
-  // Ambil semua kategori unik
   const kategoriOptions = [...new Set(barang.map(item => item.kategori))];
 
   return (
     <div className="dashboard">
       <Sidebar />
       <div className="content">
-        <h2>Daftar Barang - {user?.nama}</h2>
-
-        {/* Filter Bar */}
-        <div className="filter-bar">
-          <input
-            type="text"
-            placeholder="Cari barang..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-
-          <select value={kategoriFilter} onChange={(e) => setKategoriFilter(e.target.value)}>
-            <option value="">Semua Kategori</option>
-            {kategoriOptions.map((kategori, idx) => (
-              <option key={idx} value={kategori}>{kategori}</option>
-            ))}
-          </select>
+        <div className="content-header">
+          <h2>Daftar Barang</h2>
+          <span className="user-greeting">Halo, {user?.nama}</span>
         </div>
 
-        <table className="barang-table">
-          <thead>
-            <tr>
-              <th>Kode</th>
-              <th>Nama</th>
-              <th>Kategori</th>
-              <th>Harga Satuan</th>
-              <th>Harga Pak</th>
-              <th>Stok</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredBarang.map(item => (
-              <tr key={item._id}>
-                <td>{item.kode_barang}</td>
-                <td>{item.nama_barang}</td>
-                <td>{item.kategori}</td>
-                <td>{item.harga_satuan}</td>
-                <td>{item.harga_pak}</td>
-                <td>{item.stok}</td>
-                <td>
-                  <button onClick={() => handleEdit(item)}>Edit</button>
-                  <button onClick={() => handleDelete(item._id)} style={{ marginLeft: 5 }}>Hapus</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="card">
+          <div className="filter-bar">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Cari barang..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
+            <select
+              className="form-control"
+              value={kategoriFilter}
+              onChange={(e) => setKategoriFilter(e.target.value)}
+            >
+              <option value="">Semua Kategori</option>
+              {kategoriOptions.map((kategori, idx) => (
+                <option key={idx} value={kategori}>{kategori}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="table-container">
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                Memuat data...
+              </div>
+            ) : filteredBarang.length > 0 ? (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Kode</th>
+                    <th>Nama</th>
+                    <th>Kategori</th>
+                    <th>Harga Satuan</th>
+                    <th>Harga Pak</th>
+                    <th>Stok</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredBarang.map(item => (
+                    <tr key={item._id}>
+                      <td>{item.kode_barang}</td>
+                      <td>{item.nama_barang}</td>
+                      <td>{item.kategori}</td>
+                      <td>Rp {Number(item.harga_satuan).toLocaleString()}</td>
+                      <td>Rp {Number(item.harga_pak).toLocaleString()}</td>
+                      <td>{item.stok}</td>
+                      <td className="table-actions">
+                        <button 
+                          onClick={() => handleEdit(item)} 
+                          className="btn btn-secondary"
+                          style={{ padding: '8px 12px' }}
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(item._id)} 
+                          className="btn btn-danger"
+                          style={{ padding: '8px 12px' }}
+                        >
+                          Hapus
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                {search || kategoriFilter ? 'Tidak ada barang yang sesuai dengan filter' : 'Belum ada data barang'}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

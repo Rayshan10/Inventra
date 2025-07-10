@@ -9,6 +9,7 @@ function Register() {
     const [message, setMessage] = useState('');
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [passwordVisible, setPasswordVisible] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -34,45 +35,96 @@ function Register() {
         }
     };
 
+    const togglePasswordVisibility = () => {
+        setPasswordVisible(!passwordVisible);
+    };
+
     return (
-        <div>
-            <h2>Registrasi Akun</h2>
-            {message && (
-                <div className={`alert ${error ? 'alert-error' : 'alert-success'}`}>
-                    {message}
+        <div className="login-page">
+            <div className="login-card">
+                <div className="login-header">
+                    <h2>Create Your Account</h2>
+                    <p>Fill in your details to get started</p>
                 </div>
-            )}
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="Nama"
-                    value={form.nama}
-                    onChange={e => setForm({ ...form, nama: e.target.value })}
-                    required
-                />
 
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={form.email}
-                    onChange={e => setForm({ ...form, email: e.target.value })}
-                    required
-                />
+                {message && (
+                    <div className={`alert ${error ? 'alert-error' : 'alert-success'}`}>
+                        {message}
+                    </div>
+                )}
 
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={form.password}
-                    onChange={e => setForm({ ...form, password: e.target.value })}
-                    required
-                />
+                <form onSubmit={handleSubmit} className="login-form">
+                    <div className="form-group">
+                        <label htmlFor="nama">Full Name</label>
+                        <input
+                            id="nama"
+                            type="text"
+                            placeholder="Enter your full name"
+                            value={form.nama}
+                            onChange={e => setForm({ ...form, nama: e.target.value })}
+                            required
+                            className="form-input"
+                        />
+                    </div>
 
-                <button type="submit" disabled={loading}>Daftar</button>
-            </form>
+                    <div className="form-group">
+                        <label htmlFor="email">Email Address</label>
+                        <input
+                            id="email"
+                            type="email"
+                            placeholder="Enter your email"
+                            value={form.email}
+                            onChange={e => setForm({ ...form, email: e.target.value })}
+                            required
+                            className="form-input"
+                        />
+                    </div>
 
-            {loading && <div className="loader">Memproses registrasi...</div>}
+                    <div className="form-group">
+                        <label htmlFor="password">Password</label>
+                        <div className="password-input-container">
+                            <input
+                                id="password"
+                                type={passwordVisible ? "text" : "password"}
+                                placeholder="Create a password"
+                                value={form.password}
+                                onChange={e => setForm({ ...form, password: e.target.value })}
+                                required
+                                className="form-input"
+                            />
+                            <button 
+                                type="button" 
+                                className="password-toggle"
+                                onClick={togglePasswordVisibility}
+                                aria-label={passwordVisible ? "Hide password" : "Show password"}
+                            >
+                                {passwordVisible ? '🙈' : '👁️'}
+                            </button>
+                        </div>
+                    </div>
 
-            <p>Sudah punya akun? <a href="/">Login</a></p>
+                    
+
+                    <button 
+                        type="submit" 
+                        disabled={loading}
+                        className="login-button"
+                    >
+                        {loading ? (
+                            <>
+                                <span className="spinner"></span>
+                                Creating account...
+                            </>
+                        ) : (
+                            'Register'
+                        )}
+                    </button>
+                </form>
+
+                <div className="login-footer">
+                    <p>Already have an account? <a href="/" className="signup-link">Sign in</a></p>
+                </div>
+            </div>
         </div>
     );
 }
