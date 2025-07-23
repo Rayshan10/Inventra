@@ -14,11 +14,26 @@ function BarangList() {
   const fetchBarang = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('/api/barang');
-      setBarang(res.data.data);
-      setFilteredBarang(res.data.data);
+      const token = localStorage.getItem('token');
+      const res = await axios.get('/api/barang', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      console.log('Response:', res.data); // Debug: lihat struktur response
+
+      // Backend mengirim array langsung, bukan { data: array }
+      setBarang(res.data);
+      setFilteredBarang(res.data);
     } catch (err) {
-      console.error(err);
+      console.error('Error detail:', err);
+      if (err.response?.status === 401) {
+        alert('Token expired atau tidak valid. Silakan login kembali.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/';
+        return;
+      }
       alert('Gagal memuat data barang');
     } finally {
       setLoading(false);
@@ -54,10 +69,22 @@ function BarangList() {
   const handleDelete = async (id) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus barang ini?')) {
       try {
-        await axios.delete(`/api/barang/${id}`);
-        fetchBarang();
+        const token = localStorage.getItem('token');
+        await axios.delete(`/api/barang/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        fetchBarang(); // Refresh data setelah delete
       } catch (err) {
-        console.error(err);
+        console.error('Error delete:', err);
+        if (err.response?.status === 401) {
+          alert('Token expired atau tidak valid. Silakan login kembali.');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/';
+          return;
+        }
         alert('Gagal menghapus barang');
       }
     }
@@ -129,15 +156,15 @@ function BarangList() {
                       <td>Rp {Number(item.harga_pak).toLocaleString()}</td>
                       <td>{item.stok}</td>
                       <td className="table-actions">
-                        <button 
-                          onClick={() => handleEdit(item)} 
+                        <button
+                          onClick={() => handleEdit(item)}
                           className="btn btn-secondary"
                           style={{ padding: '8px 12px' }}
                         >
                           Edit
                         </button>
-                        <button 
-                          onClick={() => handleDelete(item._id)} 
+                        <button
+                          onClick={() => handleDelete(item._id)}
                           className="btn btn-danger"
                           style={{ padding: '8px 12px' }}
                         >
