@@ -1,24 +1,26 @@
-# Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Environment
+# Environment files
 .env
 .env.*
 !.env.example
 
-# React
+# Node.js dependencies
+node_modules/
+
+# Node.js logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# React build
 frontend_inventra/build/
 frontend_inventra/dist/
 
-# Flutter
+# Flutter generated files
 flutter_inventra/.dart_tool/
+flutter_inventra/build/
 flutter_inventra/.flutter-plugins
 flutter_inventra/.flutter-plugins-dependencies
 flutter_inventra/.packages
-flutter_inventra/build/
 
 # IDE
 .vscode/

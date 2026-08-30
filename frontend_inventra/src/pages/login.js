@@ -93,13 +93,7 @@ function Login() {
                             </div>
                         </div>
 
-                        <div className="form-options">
-                            <div className="remember-me">
-                                <input type="checkbox" id="remember" />
-                                <label htmlFor="remember">Remember me</label>
-                            </div>
-                            <a href="/forgot-password" className="forgot-password">Forgot password?</a>
-                        </div>
+                        
 
                         <button
                             type="submit"
