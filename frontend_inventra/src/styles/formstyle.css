@@ -1,0 +1,116 @@
+body, #root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input,
+button {
+    padding: 0.75rem;
+    font-size: 1rem;
+}
+
+button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #45a049;
+}
+.alert {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.loader {
+    font-size: 0.9rem;
+    color: #666;
+    text-align: center;
+}
+
+/* Password Requirements Styling */
+.password-requirements {
+    margin: 10px 0;
+    padding: 12px;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.password-requirements p {
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.password-requirements ul {
+    padding-left: 20px;
+    margin: 0;
+}
+
+.password-requirements li {
+    margin-bottom: 4px;
+}
+
+/* OTP Specific Styles */
+.otp-resend {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.otp-resend p {
+    margin-bottom: 8px;
+}
+
+.resend-button {
+    background: none;
+    border: none;
+    color: #4299e1;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    font-size: 14px;
+}
+
+.resend-button:hover {
+    text-decoration: underline;
+}
+
+.resend-button:disabled {
+    color: #a0aec0;
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+/* OTP input specific styling */
+input[inputMode="numeric"] {
+    letter-spacing: 2px;
+    font-size: 18px;
+    text-align: center;
+    font-family: monospace;
+}
