@@ -1,9 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/login';
 import Register from './pages/register';
-import Home from './pages/home';         // Tabel Barang
-import FormBarang from './pages/formbarang'; // Form Tambah/Edit Barang
-import VerifyOtp from './pages/verifyotp';   // Halaman OTP (buat baru)
+import Dashboard from './pages/home';         // Dashboard dengan KPI
+import BarangManagement from './pages/formbarang'; // Kelola Barang (list + form)
+import MutasiStok from './pages/mutasi';     // Mutasi Stok (barang masuk/keluar)
+import VerifyOtp from './pages/verifyotp';   // Verifikasi OTP
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem('token');
@@ -21,13 +22,19 @@ function App() {
         {/* Proteksi halaman */}
         <Route path="/home" element={
           <ProtectedRoute>
-            <Home />
+            <Dashboard />
           </ProtectedRoute>
         } />
 
         <Route path="/barang" element={
           <ProtectedRoute>
-            <FormBarang />
+            <BarangManagement />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/mutasi" element={
+          <ProtectedRoute>
+            <MutasiStok />
           </ProtectedRoute>
         } />
       </Routes>

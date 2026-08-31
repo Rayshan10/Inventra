@@ -1,52 +1,115 @@
-const Barang = require('../models/Barang');
+const Barang = require('../models/barang'); // Note: Lowercase 'barang' untuk consistency dengan file name
 const mongoose = require('mongoose');
 
 // Ambil semua barang
 exports.getAllBarang = async (req, res) => {
   try {
-    const data = await Barang.find();
-    res.json(data);  // Langsung kirim array, tanpa wrapper { data }
+    const { skip = 0, limit = 50, kategori, search } = req.query;
+
+    // Build query
+    const query = {};
+    if (kategori) {
+      query.kategori = kategori;
+    }
+    if (search) {
+      query.$or = [
+        { nama_barang: { $regex: search, $options: 'i' } },
+        { kode_barang: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Dapatkan total
+    const total = await Barang.countDocuments(query);
+
+    // Dapatkan data dengan pagination
+    const data = await Barang.find(query)
+      .skip(parseInt(skip))
+      .limit(parseInt(limit))
+      .sort({ tgljam: -1 })
+      .lean();
+
+    res.json({
+      success: true,
+      data: data,
+      pagination: {
+        total,
+        skip: parseInt(skip),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Error getAllBarang:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Gagal mendapatkan data barang',
+      error: err.message
+    });
   }
 };
 
 // Tambah barang baru
 exports.createBarang = async (req, res) => {
   try {
-    console.log('Received data:', req.body);
-    
-    // Validasi manual
+    const { kode_barang, nama_barang, kategori, harga_satuan, harga_pak, stok } = req.body;
+
+    // Validasi input
     const requiredFields = ['kode_barang', 'nama_barang', 'kategori', 'harga_satuan', 'harga_pak', 'stok'];
     const missingFields = requiredFields.filter(field => !req.body[field]);
-    
+
     if (missingFields.length > 0) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'Field berikut harus diisi: ' + missingFields.join(', '),
-        receivedData: req.body
+        message: 'Field berikut harus diisi: ' + missingFields.join(', ')
       });
     }
 
-    // Pastikan tipe data numerik
-    if (isNaN(req.body.harga_satuan) || isNaN(req.body.harga_pak) || isNaN(req.body.stok)) {
-      return res.status(400).json({ 
+    // Validasi tipe data numerik
+    if (isNaN(harga_satuan) || isNaN(harga_pak) || isNaN(stok)) {
+      return res.status(400).json({
         success: false,
         message: 'Harga dan stok harus berupa angka'
       });
     }
 
-    const barang = new Barang(req.body);
+    if (stok < 0 || harga_satuan < 0 || harga_pak < 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Harga dan stok tidak boleh negatif'
+      });
+    }
+
+    // Cek duplikasi kode barang
+    const existingBarang = await Barang.findOne({ kode_barang });
+    if (existingBarang) {
+      return res.status(400).json({
+        success: false,
+        message: 'Kode barang sudah ada'
+      });
+    }
+
+    // Buat barang baru
+    const barang = new Barang({
+      kode_barang,
+      nama_barang,
+      kategori,
+      harga_satuan: Number(harga_satuan),
+      harga_pak: Number(harga_pak),
+      stok: Number(stok)
+    });
+
     await barang.save();
-    
+
     res.status(201).json({
       success: true,
+      message: 'Barang berhasil ditambahkan',
       data: barang
     });
+
   } catch (err) {
-    console.error('Error:', err);
-    
-    // Handle duplicate key error
+    console.error('Error createBarang:', err);
+
+    // Handle error spesifik
     if (err.code === 11000) {
       return res.status(400).json({
         success: false,
@@ -54,12 +117,11 @@ exports.createBarang = async (req, res) => {
         error: err.message
       });
     }
-    
-    res.status(400).json({ 
+
+    res.status(500).json({
       success: false,
-      message: 'Gagal tambah barang',
-      error: err.message,
-      errors: err.errors 
+      message: 'Gagal menambahkan barang',
+      error: err.message
     });
   }
 };
@@ -68,63 +130,117 @@ exports.createBarang = async (req, res) => {
 exports.updateBarang = async (req, res) => {
   try {
     const { id } = req.params;
-    const updated = await Barang.findByIdAndUpdate(id, req.body, { new: true });
-    if (!updated) throw new Error("Barang tidak ditemukan");
-    res.json(updated);
+
+    // Validasi ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Format ID tidak valid'
+      });
+    }
+
+    // Jangan izinkan update kode_barang
+    if (req.body.kode_barang) {
+      delete req.body.kode_barang;
+    }
+
+    // Validasi tipe data jika ada update harga/stok
+    if (req.body.harga_satuan !== undefined && isNaN(req.body.harga_satuan)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Harga satuan harus berupa angka'
+      });
+    }
+
+    if (req.body.harga_pak !== undefined && isNaN(req.body.harga_pak)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Harga pak harus berupa angka'
+      });
+    }
+
+    // Update dengan validasi
+    const updated = await Barang.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({
+        success: false,
+        message: 'Barang tidak ditemukan'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Barang berhasil diperbarui',
+      data: updated
+    });
+
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error('Error updateBarang:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Gagal memperbarui barang',
+      error: err.message
+    });
   }
 };
 
 // Hapus barang
 exports.deleteBarang = async (req, res) => {
   try {
-    // 1. Validasi ID
-    if (!req.params.id || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+    const { id } = req.params;
+
+    // Validasi ID
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
-        message: "Format ID tidak valid"
+        message: 'Format ID tidak valid'
       });
     }
 
-    // 2. Eksekusi Delete
-    const deletedBarang = await Barang.findOneAndDelete({ 
-      _id: req.params.id 
+    // Eksekusi Delete
+    const deletedBarang = await Barang.findOneAndDelete({
+      _id: id
     });
 
-    // 3. Handle jika barang tidak ditemukan
+    // Handle jika barang tidak ditemukan
     if (!deletedBarang) {
       return res.status(404).json({
         success: false,
-        message: "Barang tidak ditemukan"
+        message: 'Barang tidak ditemukan'
       });
     }
 
-    // 4. Response sukses
+    // Response sukses
     res.status(200).json({
       success: true,
-      message: "Barang berhasil dihapus",
+      message: 'Barang berhasil dihapus',
       data: {
+        _id: deletedBarang._id,
         kode_barang: deletedBarang.kode_barang,
-        nama: deletedBarang.nama_barang
+        nama_barang: deletedBarang.nama_barang
       }
     });
 
   } catch (error) {
-    console.error("Error dalam deleteBarang:", error);
-    
-    // 5. Handle error khusus
+    console.error('Error deleteBarang:', error);
+
+    // Handle error khusus
     if (error.name === 'CastError') {
       return res.status(400).json({
         success: false,
-        message: "Format ID tidak valid"
+        message: 'Format ID tidak valid'
       });
     }
 
-    // 6. Error umum
+    // Error umum
     res.status(500).json({
       success: false,
-      message: "Terjadi kesalahan server",
+      message: 'Gagal menghapus barang',
       error: error.message
     });
   }

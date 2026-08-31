@@ -6,24 +6,13 @@ const connectDB = require('./config/db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Konfigurasi CORS yang lebih sederhana untuk development
+// Konfigurasi CORS untuk production-ready
 const corsOptions = {
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:54147',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:54147',
-    /^http:\/\/localhost(:\d+)?$/,
-    /^http:\/\/127\.0\.0\.1(:\d+)?$/
-  ],
+  origin: process.env.NODE_ENV === 'production'
+    ? process.env.FRONTEND_URL
+    : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'Accept',
-    'Origin',
-    'X-Requested-With'
-  ],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
   optionsSuccessStatus: 200
 };
@@ -35,33 +24,42 @@ app.use(express.urlencoded({ extended: true }));
 
 // Database connection
 connectDB().catch(err => {
-  console.error('Database connection failed:', err);
+  console.error('❌ Database connection failed:', err);
   process.exit(1);
 });
 
 // Routes
 const authRoutes = require('./routes/authroutes');
 const barangRoutes = require('./routes/barangroutes');
+const mutasiRoutes = require('./routes/mutasiroutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/barang', barangRoutes);
+app.use('/api/mutasi', mutasiRoutes);
 
-// Error handling
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Error handling - 404
 app.use((req, res, next) => {
   res.status(404).json({
     success: false,
-    message: `Route ${req.method} ${req.path} not found`
+    message: `Route ${req.method} ${req.path} tidak ditemukan`
   });
 });
 
+// Error handling - Server error
 app.use((err, req, res, next) => {
-  console.error('Error:', err.stack);
+  console.error('❌ Server Error:', err.stack);
   res.status(500).json({
     success: false,
-    message: 'Internal Server Error'
+    message: 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`✅ Server running on http://localhost:${PORT}`);
 });

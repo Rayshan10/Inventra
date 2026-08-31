@@ -3,10 +3,11 @@ import '../styles/dashboard.css';
 
 function Sidebar() {
   const location = useLocation();
-  
+
   const menuItems = [
     { path: '/home', icon: '🏠', label: 'Dashboard' },
-    { path: '/barang', icon: '📦', label: 'Form Barang' },
+    { path: '/barang', icon: '📦', label: 'Kelola Barang' },
+    { path: '/mutasi', icon: '📊', label: 'Mutasi Stok' },
     { path: '/', icon: '🚪', label: 'Logout' }
   ];
 
@@ -18,8 +19,8 @@ function Sidebar() {
       <ul>
         {menuItems.map((item) => (
           <li key={item.path}>
-            <Link 
-              to={item.path} 
+            <Link
+              to={item.path}
               className={location.pathname === item.path ? 'active' : ''}
             >
               <span>{item.icon}</span>

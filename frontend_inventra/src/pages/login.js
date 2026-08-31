@@ -20,15 +20,20 @@ function Login() {
         try {
             const res = await axios.post('/api/auth/login', form);
 
-            // ✅ Simpan token & user info ke localStorage
-            localStorage.setItem('token', res.data.token);
-            localStorage.setItem('user', JSON.stringify(res.data.user));
+            if (res.data.success) {
+                // ✅ Simpan token & user info ke localStorage (format response baru)
+                localStorage.setItem('token', res.data.data.token);
+                localStorage.setItem('user', JSON.stringify(res.data.data.user));
 
-            setMessage(res.data.message);
-            setError(false);
+                setMessage(res.data.message);
+                setError(false);
 
-            // ✅ Arahkan ke halaman utama setelah login berhasil
-            setTimeout(() => navigate('/home'), 1000);
+                // ✅ Arahkan ke halaman utama setelah login berhasil
+                setTimeout(() => navigate('/home'), 1000);
+            } else {
+                setError(true);
+                setMessage(res.data.message || 'Login gagal');
+            }
         } catch (err) {
             setError(true);
             setMessage(err.response?.data?.message || 'Login gagal');
@@ -93,7 +98,7 @@ function Login() {
                             </div>
                         </div>
 
-                        
+
 
                         <button
                             type="submit"

@@ -3,40 +3,52 @@ import axios from 'axios';
 import Sidebar from '../components/sidebar';
 import '../styles/dashboard.css';
 
-function BarangList() {
+function Dashboard() {
   const [user] = useState(JSON.parse(localStorage.getItem('user')));
-  const [barang, setBarang] = useState([]);
-  const [filteredBarang, setFilteredBarang] = useState([]);
-  const [search, setSearch] = useState('');
-  const [kategoriFilter, setKategoriFilter] = useState('');
+  const [stats, setStats] = useState(null);
+  const [barangList, setBarangList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const fetchBarang = async () => {
+  // Fetch stats dari dashboard
+  const fetchStats = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('/api/barang', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const res = await axios.get('/api/mutasi/stats', {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-      console.log('Response:', res.data); // Debug: lihat struktur response
 
-      // Backend mengirim array langsung, bukan { data: array }
-      setBarang(res.data);
-      setFilteredBarang(res.data);
+      if (res.data.success) {
+        setStats(res.data.data);
+      }
     } catch (err) {
-      console.error('Error detail:', err);
+      console.error('Error fetch stats:', err);
       if (err.response?.status === 401) {
-        alert('Token expired atau tidak valid. Silakan login kembali.');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         window.location.href = '/';
         return;
       }
-      alert('Gagal memuat data barang');
+      setError('Gagal memuat statistik');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch barang terbaru juga dengan endpoint barang
+  const fetchBarangTerbaru = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get('/api/barang?limit=5', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.data.success) {
+        setBarangList(res.data.data);
+      }
+    } catch (err) {
+      console.error('Error fetch barang:', err);
     }
   };
 
@@ -46,145 +58,171 @@ function BarangList() {
       window.location.href = '/';
       return;
     }
-    fetchBarang();
+
+    fetchStats();
+    fetchBarangTerbaru();
   }, [user]);
 
-  useEffect(() => {
-    let filtered = barang;
-
-    if (search) {
-      filtered = filtered.filter(item =>
-        item.nama_barang.toLowerCase().includes(search.toLowerCase()) ||
-        item.kode_barang.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    if (kategoriFilter) {
-      filtered = filtered.filter(item => item.kategori === kategoriFilter);
-    }
-
-    setFilteredBarang(filtered);
-  }, [search, kategoriFilter, barang]);
-
-  const handleDelete = async (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus barang ini?')) {
-      try {
-        const token = localStorage.getItem('token');
-        await axios.delete(`/api/barang/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        fetchBarang(); // Refresh data setelah delete
-      } catch (err) {
-        console.error('Error delete:', err);
-        if (err.response?.status === 401) {
-          alert('Token expired atau tidak valid. Silakan login kembali.');
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/';
-          return;
-        }
-        alert('Gagal menghapus barang');
-      }
-    }
+  // Fungsi untuk format currency
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
   };
 
-  const handleEdit = (item) => {
-    localStorage.setItem('editBarang', JSON.stringify(item));
-    window.location.href = '/barang';
+  // Fungsi untuk get status stok
+  const getStokStatus = (stok) => {
+    if (stok === 0) return { status: 'Habis', class: 'status-habis', icon: '❌' };
+    if (stok < 10) return { status: 'Menipis', class: 'status-menipis', icon: '⚠️' };
+    return { status: 'Aman', class: 'status-aman', icon: '✅' };
   };
 
-  const kategoriOptions = [...new Set(barang.map(item => item.kategori))];
+  if (loading) {
+    return (
+      <div className="dashboard">
+        <Sidebar />
+        <div className="content">
+          <div style={{ textAlign: 'center', padding: '40px' }}>
+            <p>Memuat dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard">
       <Sidebar />
       <div className="content">
+        {/* Header */}
         <div className="content-header">
-          <h2>Daftar Barang</h2>
-          <span className="user-greeting">Halo, {user?.nama}</span>
+          <h2>Dashboard</h2>
+          <span className="user-greeting">Selamat datang, {user?.nama}!</span>
         </div>
 
-        <div className="card">
-          <div className="filter-bar">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Cari barang..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-
-            <select
-              className="form-control"
-              value={kategoriFilter}
-              onChange={(e) => setKategoriFilter(e.target.value)}
-            >
-              <option value="">Semua Kategori</option>
-              {kategoriOptions.map((kategori, idx) => (
-                <option key={idx} value={kategori}>{kategori}</option>
-              ))}
-            </select>
+        {/* Error Message */}
+        {error && (
+          <div className="alert alert-error" style={{ marginBottom: '20px' }}>
+            {error}
           </div>
+        )}
 
-          <div className="table-container">
-            {loading ? (
-              <div style={{ textAlign: 'center', padding: '20px' }}>
-                Memuat data...
+        {/* KPI Cards */}
+        {stats && (
+          <div className="kpi-grid">
+            {/* Total Barang */}
+            <div className="kpi-card kpi-total">
+              <div className="kpi-icon">📦</div>
+              <div className="kpi-content">
+                <h3>Total Barang</h3>
+                <p className="kpi-value">{stats.totalBarang}</p>
+                <span className="kpi-label">SKU dalam sistem</span>
               </div>
-            ) : filteredBarang.length > 0 ? (
-              <table className="table">
+            </div>
+
+            {/* Stok Aman */}
+            <div className="kpi-card kpi-aman">
+              <div className="kpi-icon">✅</div>
+              <div className="kpi-content">
+                <h3>Stok Aman</h3>
+                <p className="kpi-value">{stats.totalBarang - stats.stokHabis - stats.stokMenipis}</p>
+                <span className="kpi-label">Stok tersedia cukup</span>
+              </div>
+            </div>
+
+            {/* Stok Menipis */}
+            <div className="kpi-card kpi-menipis">
+              <div className="kpi-icon">⚠️</div>
+              <div className="kpi-content">
+                <h3>Stok Menipis</h3>
+                <p className="kpi-value">{stats.stokMenipis}</p>
+                <span className="kpi-label">Perlu segera restock</span>
+              </div>
+            </div>
+
+            {/* Stok Habis */}
+            <div className="kpi-card kpi-habis">
+              <div className="kpi-icon">❌</div>
+              <div className="kpi-content">
+                <h3>Stok Habis</h3>
+                <p className="kpi-value">{stats.stokHabis}</p>
+                <span className="kpi-label">Harus dipesan ulang</span>
+              </div>
+            </div>
+
+            {/* Nilai Total Stok */}
+            <div className="kpi-card kpi-nilai">
+              <div className="kpi-icon">💰</div>
+              <div className="kpi-content">
+                <h3>Nilai Total Stok</h3>
+                <p className="kpi-value-currency">
+                  {formatCurrency(stats.nilaiStok.totalNilai || 0)}
+                </p>
+                <span className="kpi-label">{stats.nilaiStok.totalStok} unit</span>
+              </div>
+            </div>
+
+            {/* Quick Action */}
+            <div className="kpi-card kpi-action">
+              <div className="kpi-icon">➕</div>
+              <div className="kpi-content">
+                <h3>Aksi Cepat</h3>
+                <div className="quick-actions">
+                  <a href="/barang" className="btn btn-sm btn-primary">Kelola Barang</a>
+                  <a href="/mutasi" className="btn btn-sm btn-secondary">Mutasi Stok</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Barang Terbaru */}
+        {barangList.length > 0 && (
+          <div className="card" style={{ marginTop: '30px' }}>
+            <div className="card-header">
+              <h3>📦 Barang Terbaru</h3>
+            </div>
+            <div className="table-container">
+              <table className="table table-sm">
                 <thead>
                   <tr>
                     <th>Kode</th>
-                    <th>Nama</th>
+                    <th>Nama Barang</th>
                     <th>Kategori</th>
-                    <th>Harga Satuan</th>
-                    <th>Harga Pak</th>
+                    <th>Harga</th>
                     <th>Stok</th>
-                    <th>Aksi</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredBarang.map(item => (
-                    <tr key={item._id}>
-                      <td>{item.kode_barang}</td>
-                      <td>{item.nama_barang}</td>
-                      <td>{item.kategori}</td>
-                      <td>Rp {Number(item.harga_satuan).toLocaleString()}</td>
-                      <td>Rp {Number(item.harga_pak).toLocaleString()}</td>
-                      <td>{item.stok}</td>
-                      <td className="table-actions">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="btn btn-secondary"
-                          style={{ padding: '8px 12px' }}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item._id)}
-                          className="btn btn-danger"
-                          style={{ padding: '8px 12px' }}
-                        >
-                          Hapus
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {barangList.map(barang => {
+                    const stokStatus = getStokStatus(barang.stok);
+                    return (
+                      <tr key={barang._id}>
+                        <td><strong>{barang.kode_barang}</strong></td>
+                        <td>{barang.nama_barang}</td>
+                        <td>{barang.kategori}</td>
+                        <td>{formatCurrency(barang.harga_satuan)}</td>
+                        <td><strong>{barang.stok}</strong></td>
+                        <td>
+                          <span className={`badge ${stokStatus.class}`}>
+                            {stokStatus.icon} {stokStatus.status}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '20px' }}>
-                {search || kategoriFilter ? 'Tidak ada barang yang sesuai dengan filter' : 'Belum ada data barang'}
-              </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
 
-export default BarangList;
+export default Dashboard;
