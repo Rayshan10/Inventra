@@ -49,7 +49,9 @@ class HomeScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => BarangListScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => BarangListScreen(),
+                      ),
                     );
                   },
                   child: Text('Manage Barang'),
@@ -63,17 +65,21 @@ class HomeScreen extends StatelessWidget {
   }
 
   Future<void> _performLogout(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.maybeOf(context);
+
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
       await authService.logout();
-      
-      // Navigasi ke login setelah logout berhasil
-      Navigator.of(context).pushAndRemoveUntil(
+
+      if (!navigator.mounted) return;
+      navigator.pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginScreen()),
         (Route<dynamic> route) => false,
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      if (!navigator.mounted) return;
+      messenger?.showSnackBar(
         SnackBar(content: Text('Logout gagal: ${e.toString()}')),
       );
     }

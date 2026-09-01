@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
-void showSnackBar(BuildContext context, String message, {bool isError = false}) {
+void showSnackBar(
+  BuildContext context,
+  String message, {
+  bool isError = false,
+}) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Text(message),
@@ -10,8 +14,5 @@ void showSnackBar(BuildContext context, String message, {bool isError = false}) 
 }
 
 String formatCurrency(int amount) {
-  return 'Rp ${amount.toString().replaceAllMapped(
-        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-        (Match m) => '${m[1]}.',
-      )}';
+  return 'Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
 }

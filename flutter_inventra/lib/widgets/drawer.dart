@@ -7,8 +7,9 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context);
+    final authService = Provider.of<AuthService>(context, listen: false);
     final user = authService.user;
+    final navigator = Navigator.of(context);
 
     return Drawer(
       child: ListView(
@@ -17,22 +18,20 @@ class AppDrawer extends StatelessWidget {
           UserAccountsDrawerHeader(
             accountName: Text(user?.nama ?? 'User'),
             accountEmail: Text(user?.email ?? ''),
-            currentAccountPicture: CircleAvatar(
-              child: Icon(Icons.person),
-            ),
+            currentAccountPicture: CircleAvatar(child: Icon(Icons.person)),
           ),
           ListTile(
             leading: Icon(Icons.dashboard),
             title: Text('Dashboard'),
             onTap: () {
-              Navigator.popAndPushNamed(context, '/home');
+              navigator.popAndPushNamed('/home');
             },
           ),
           ListTile(
             leading: Icon(Icons.inventory),
             title: Text('Barang'),
             onTap: () {
-              Navigator.popAndPushNamed(context, '/barang');
+              navigator.popAndPushNamed('/barang');
             },
           ),
           Divider(),
@@ -41,7 +40,8 @@ class AppDrawer extends StatelessWidget {
             title: Text('Logout'),
             onTap: () async {
               await authService.logout();
-              Navigator.popAndPushNamed(context, '/login');
+              if (!navigator.mounted) return;
+              navigator.popAndPushNamed('/login');
             },
           ),
         ],

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class User {
   final String id;
   final String nama;
@@ -15,7 +17,7 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     // Debug: Print received JSON untuk troubleshooting
-    print('User.fromJson received: $json');
+    debugPrint('User.fromJson received: $json');
 
     return User(
       // Handle berbagai kemungkinan null dan format ID
@@ -40,7 +42,7 @@ class User {
     // Jika data user ada di dalam nested object
     Map<String, dynamic> userData = json['user'] ?? json['data'] ?? json;
 
-    print('User.fromJsonSafe received: $userData');
+    debugPrint('User.fromJsonSafe received: $userData');
 
     return User(
       id: _safeStringFromJson(userData, ['_id', 'id']),

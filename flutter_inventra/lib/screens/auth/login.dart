@@ -7,17 +7,18 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
-  
+
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -29,23 +30,18 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       duration: Duration(milliseconds: 1500),
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
     _slideAnimation = Tween<Offset>(
       begin: Offset(0, 0.5),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
-    
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
+
     _animationController.forward();
   }
 
@@ -57,23 +53,28 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       _errorMessage = null;
     });
 
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final navigator = Navigator.of(context);
+
     try {
-      await Provider.of<AuthService>(context, listen: false).login(
+      await authService.login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
-      
-      // Navigasi setelah login berhasil
-      Navigator.pushReplacementNamed(context, '/barang_list');
-      
+
+      if (!mounted) return;
+      navigator.pushReplacementNamed('/barang_list');
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = e.toString().replaceAll('Exception: ', '');
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -85,10 +86,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF667eea),
-              Color(0xFF764ba2),
-            ],
+            colors: [Color(0xFF667eea), Color(0xFF764ba2)],
           ),
         ),
         child: SafeArea(
@@ -106,14 +104,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       Container(
                         padding: EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
-                          Icons.book,
-                          size: 60,
-                          color: Colors.white,
-                        ),
+                        child: Icon(Icons.book, size: 60, color: Colors.white),
                       ),
                       SizedBox(height: 20),
                       Text(
@@ -130,11 +124,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         'Selamat datang kembali',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                         ),
                       ),
                       SizedBox(height: 40),
-                      
+
                       // Form Section
                       Container(
                         padding: EdgeInsets.all(32),
@@ -143,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 20,
                               offset: Offset(0, 10),
                             ),
@@ -165,7 +159,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                   ),
                                   child: Row(
                                     children: [
-                                      Icon(Icons.error_outline, color: Colors.red[600], size: 20),
+                                      Icon(
+                                        Icons.error_outline,
+                                        color: Colors.red[600],
+                                        size: 20,
+                                      ),
                                       SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
@@ -181,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                 ),
                                 SizedBox(height: 20),
                               ],
-                              
+
                               // Email Field
                               TextFormField(
                                 controller: _emailController,
@@ -191,10 +189,15 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                   prefixIcon: Container(
                                     margin: EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: Color(0xFF667eea).withOpacity(0.1),
+                                      color: Color(
+                                        0xFF667eea,
+                                      ).withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: Icon(Icons.email_outlined, color: Color(0xFF667eea)),
+                                    child: Icon(
+                                      Icons.email_outlined,
+                                      color: Color(0xFF667eea),
+                                    ),
                                   ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
@@ -202,21 +205,26 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                   ),
                                   filled: true,
                                   fillColor: Colors.grey[50],
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
                                 ),
                                 keyboardType: TextInputType.emailAddress,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Mohon masukkan email Anda';
                                   }
-                                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                                  if (!RegExp(
+                                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                  ).hasMatch(value)) {
                                     return 'Format email tidak valid';
                                   }
                                   return null;
                                 },
                               ),
                               SizedBox(height: 20),
-                              
+
                               // Password Field
                               TextFormField(
                                 controller: _passwordController,
@@ -226,14 +234,21 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                   prefixIcon: Container(
                                     margin: EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: Color(0xFF667eea).withOpacity(0.1),
+                                      color: Color(
+                                        0xFF667eea,
+                                      ).withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: Icon(Icons.lock_outline, color: Color(0xFF667eea)),
+                                    child: Icon(
+                                      Icons.lock_outline,
+                                      color: Color(0xFF667eea),
+                                    ),
                                   ),
                                   suffixIcon: IconButton(
                                     icon: Icon(
-                                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                      _obscurePassword
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
                                       color: Colors.grey[600],
                                     ),
                                     onPressed: () {
@@ -248,7 +263,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                   ),
                                   filled: true,
                                   fillColor: Colors.grey[50],
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
                                 ),
                                 obscureText: _obscurePassword,
                                 validator: (value) {
@@ -262,19 +280,24 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                 },
                               ),
                               SizedBox(height: 30),
-                              
+
                               // Login Button
                               Container(
                                 width: double.infinity,
                                 height: 56,
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
-                                    colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                                    colors: [
+                                      Color(0xFF667eea),
+                                      Color(0xFF764ba2),
+                                    ],
                                   ),
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Color(0xFF667eea).withOpacity(0.3),
+                                      color: Color(
+                                        0xFF667eea,
+                                      ).withValues(alpha: 0.3),
                                       blurRadius: 8,
                                       offset: Offset(0, 4),
                                     ),
@@ -289,24 +312,25 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
-                                  child: _isLoading
-                                      ? SizedBox(
-                                          width: 24,
-                                          height: 24,
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                            strokeWidth: 2,
+                                  child:
+                                      _isLoading
+                                          ? SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                          : Text(
+                                            'MASUK',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 1,
+                                            ),
                                           ),
-                                        )
-                                      : Text(
-                                          'MASUK',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            letterSpacing: 1,
-                                          ),
-                                        ),
                                 ),
                               ),
                             ],
@@ -314,7 +338,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         ),
                       ),
                       SizedBox(height: 24),
-                      
+
                       // Register Link
                       Container(
                         padding: EdgeInsets.symmetric(vertical: 16),
@@ -324,7 +348,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                             Text(
                               'Belum punya akun? ',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.8),
+                                color: Colors.white.withValues(alpha: 0.8),
                                 fontSize: 14,
                               ),
                             ),
@@ -333,8 +357,18 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                 Navigator.push(
                                   context,
                                   PageRouteBuilder(
-                                    pageBuilder: (context, animation, secondaryAnimation) => RegisterScreen(),
-                                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                    pageBuilder:
+                                        (
+                                          context,
+                                          animation,
+                                          secondaryAnimation,
+                                        ) => RegisterScreen(),
+                                    transitionsBuilder: (
+                                      context,
+                                      animation,
+                                      secondaryAnimation,
+                                      child,
+                                    ) {
                                       return SlideTransition(
                                         position: Tween<Offset>(
                                           begin: Offset(1.0, 0.0),

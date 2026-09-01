@@ -10,7 +10,7 @@ class BarangFormScreen extends StatefulWidget {
   const BarangFormScreen({super.key, this.barang});
 
   @override
-  _BarangFormScreenState createState() => _BarangFormScreenState();
+  State<BarangFormScreen> createState() => _BarangFormScreenState();
 }
 
 class _BarangFormScreenState extends State<BarangFormScreen> {
@@ -43,9 +43,11 @@ class _BarangFormScreenState extends State<BarangFormScreen> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
-    // Validasi tambahan
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final navigator = Navigator.of(context);
+
     if (_barang.hargaSatuan <= 0 || _barang.hargaPak <= 0 || _barang.stok < 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger?.showSnackBar(
         const SnackBar(content: Text('Harga dan stok harus lebih dari 0')),
       );
       return;
@@ -63,18 +65,22 @@ class _BarangFormScreenState extends State<BarangFormScreen> {
 
       if (widget.barang != null) {
         await apiService.updateBarang(_barang, authService.token!);
-        ScaffoldMessenger.of(context).showSnackBar(
+        if (!mounted) return;
+        messenger?.showSnackBar(
           const SnackBar(content: Text('Barang berhasil diperbarui')),
         );
       } else {
         await apiService.createBarang(_barang, authService.token!);
-        ScaffoldMessenger.of(context).showSnackBar(
+        if (!mounted) return;
+        messenger?.showSnackBar(
           const SnackBar(content: Text('Barang berhasil ditambahkan')),
         );
       }
-      Navigator.pop(context, true);
+      if (!mounted) return;
+      navigator.pop(true);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      if (!mounted) return;
+      messenger?.showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
           duration: const Duration(seconds: 5),
@@ -279,10 +285,14 @@ class _BarangFormScreenState extends State<BarangFormScreen> {
 
   Future<void> _deleteBarang() async {
     try {
-      // Validasi ID
       if (_barang.id == null || _barang.id!.isEmpty) {
         throw Exception('ID barang tidak valid');
       }
+
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final apiService = Provider.of<ApiService>(context, listen: false);
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      final navigator = Navigator.of(context);
 
       final confirmed =
           await showDialog<bool>(
@@ -312,24 +322,25 @@ class _BarangFormScreenState extends State<BarangFormScreen> {
 
       setState(() => _isLoading = true);
 
-      final authService = Provider.of<AuthService>(context, listen: false);
-      final apiService = Provider.of<ApiService>(context, listen: false);
-
       await apiService.deleteBarang(_barang.id!, authService.token!);
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Barang berhasil dihapus')));
+      if (!mounted) return;
+      messenger?.showSnackBar(
+        const SnackBar(content: Text('Barang berhasil dihapus')),
+      );
 
-      Navigator.pop(context, true);
+      if (!mounted) return;
+      navigator.pop(true);
     } on FormatException catch (e) {
-      ScaffoldMessenger.of(
+      if (!mounted) return;
+      ScaffoldMessenger.maybeOf(
         context,
-      ).showSnackBar(SnackBar(content: Text(e.message)));
+      )?.showSnackBar(SnackBar(content: Text(e.message)));
     } on Exception catch (e) {
-      ScaffoldMessenger.of(
+      if (!mounted) return;
+      ScaffoldMessenger.maybeOf(
         context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      )?.showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);

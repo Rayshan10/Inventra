@@ -4,7 +4,8 @@ class LoadingOverlay extends StatelessWidget {
   final Widget child;
   final bool isLoading;
 
-  const LoadingOverlay({super.key, 
+  const LoadingOverlay({
+    super.key,
     required this.child,
     required this.isLoading,
   });
@@ -16,10 +17,8 @@ class LoadingOverlay extends StatelessWidget {
         child,
         if (isLoading)
           Container(
-            color: Colors.black.withOpacity(0.5),
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
+            color: Colors.black.withValues(alpha: 0.5),
+            child: Center(child: CircularProgressIndicator()),
           ),
       ],
     );

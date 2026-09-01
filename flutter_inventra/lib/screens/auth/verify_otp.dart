@@ -10,18 +10,22 @@ class VerifyOtpScreen extends StatefulWidget {
   const VerifyOtpScreen({required this.email, super.key});
 
   @override
-  _VerifyOtpScreenState createState() => _VerifyOtpScreenState();
+  State<VerifyOtpScreen> createState() => _VerifyOtpScreenState();
 }
 
-class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderStateMixin {
-  final List<TextEditingController> _controllers = List.generate(6, (index) => TextEditingController());
+class _VerifyOtpScreenState extends State<VerifyOtpScreen>
+    with TickerProviderStateMixin {
+  final List<TextEditingController> _controllers = List.generate(
+    6,
+    (index) => TextEditingController(),
+  );
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
   bool _isLoading = false;
   String? _errorMessage;
   bool _isResending = false;
   Timer? _timer;
   int _resendCountdown = 0;
-  
+
   late AnimationController _animationController;
   late AnimationController _shakeController;
   late Animation<double> _fadeAnimation;
@@ -40,36 +44,27 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
       duration: Duration(milliseconds: 1500),
       vsync: this,
     );
-    
+
     _shakeController = AnimationController(
       duration: Duration(milliseconds: 600),
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
     _slideAnimation = Tween<Offset>(
       begin: Offset(0, 0.5),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
-    
-    _shakeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _shakeController,
-      curve: Curves.elasticIn,
-    ));
-    
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
+
+    _shakeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _shakeController, curve: Curves.elasticIn),
+    );
+
     _animationController.forward();
   }
 
@@ -90,7 +85,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
 
   Future<void> _verifyOtp() async {
     String otpCode = _getOtpCode();
-    
+
     if (otpCode.isEmpty || otpCode.length != 6) {
       setState(() => _errorMessage = 'Masukkan kode OTP lengkap (6 digit)');
       _shakeController.forward().then((_) => _shakeController.reset());
@@ -102,23 +97,25 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
       _errorMessage = null;
     });
 
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final navigator = Navigator.of(context);
+
     try {
-      final authService = Provider.of<AuthService>(context, listen: false);
-      
-      print('DEBUG: Verifying OTP for email: ${widget.email}');
-      print('DEBUG: OTP code: $otpCode');
-      
+      debugPrint('DEBUG: Verifying OTP for email: ${widget.email}');
+      debugPrint('DEBUG: OTP code: $otpCode');
+
       await authService.verifyOTP(widget.email, otpCode);
-      
-      print('DEBUG: OTP verification successful');
-      
-      // Success animation before navigation
+
+      debugPrint('DEBUG: OTP verification successful');
+
       await _showSuccessAnimation();
-      Navigator.pushReplacementNamed(context, '/login');
+      if (!mounted) return;
+      navigator.pushReplacementNamed('/login');
     } catch (e) {
-      print('DEBUG: OTP verification error: $e');
-      print('DEBUG: Error type: ${e.runtimeType}');
-      
+      debugPrint('DEBUG: OTP verification error: $e');
+      debugPrint('DEBUG: Error type: ${e.runtimeType}');
+
+      if (!mounted) return;
       setState(() {
         _errorMessage = _parseErrorMessage(e.toString());
       });
@@ -132,43 +129,47 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
   }
 
   Future<void> _showSuccessAnimation() async {
-    showDialog(
+    final navigator = Navigator.of(context);
+
+    await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Center(
-        child: Container(
-          padding: EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.green[50],
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.check, color: Colors.green, size: 32),
+      builder:
+          (context) => Center(
+            child: Container(
+              padding: EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
               ),
-              SizedBox(height: 16),
-              Text(
-                'Verifikasi Berhasil!',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green[700],
-                ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.green[50],
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.check, color: Colors.green, size: 32),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Verifikasi Berhasil!',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green[700],
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
     );
     await Future.delayed(Duration(seconds: 2));
-    Navigator.of(context).pop();
+    if (!mounted) return;
+    navigator.pop();
   }
 
   void _clearOtpFields() {
@@ -186,13 +187,15 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
       _errorMessage = null;
     });
 
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final messenger = ScaffoldMessenger.maybeOf(context);
+
     try {
-      final authService = Provider.of<AuthService>(context, listen: false);
-      
-      print('DEBUG: Resending OTP for email: ${widget.email}');
+      debugPrint('DEBUG: Resending OTP for email: ${widget.email}');
       await authService.resendOTP(widget.email);
-      
-      ScaffoldMessenger.of(context).showSnackBar(
+
+      if (!mounted) return;
+      messenger?.showSnackBar(
         SnackBar(
           content: Row(
             children: [
@@ -206,11 +209,12 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       );
-      
+
       _startResendTimer();
       _clearOtpFields();
     } catch (e) {
-      print('DEBUG: Resend OTP error: $e');
+      debugPrint('DEBUG: Resend OTP error: $e');
+      if (!mounted) return;
       setState(() {
         _errorMessage = _parseErrorMessage(e.toString());
       });
@@ -222,24 +226,30 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
   }
 
   String _parseErrorMessage(String error) {
-    print('DEBUG: Parsing error message: $error');
-    
+    debugPrint('DEBUG: Parsing error message: $error');
+
     String lowerError = error.toLowerCase();
-    
-    if (lowerError.contains('otp') && (lowerError.contains('salah') || lowerError.contains('invalid') || lowerError.contains('wrong'))) {
+
+    if (lowerError.contains('otp') &&
+        (lowerError.contains('salah') ||
+            lowerError.contains('invalid') ||
+            lowerError.contains('wrong'))) {
       return 'Kode OTP tidak valid';
-    } else if (lowerError.contains('tidak ditemukan') || lowerError.contains('not found')) {
+    } else if (lowerError.contains('tidak ditemukan') ||
+        lowerError.contains('not found')) {
       return 'Email tidak terdaftar';
-    } else if (lowerError.contains('timeout') || lowerError.contains('connection')) {
+    } else if (lowerError.contains('timeout') ||
+        lowerError.contains('connection')) {
       return 'Koneksi timeout, coba lagi';
     } else if (lowerError.contains('expired')) {
       return 'Kode OTP sudah kadaluarsa';
     } else if (lowerError.contains('already verified')) {
       return 'Email sudah terverifikasi';
-    } else if (lowerError.contains('network') || lowerError.contains('internet')) {
+    } else if (lowerError.contains('network') ||
+        lowerError.contains('internet')) {
       return 'Periksa koneksi internet Anda';
     }
-    
+
     return 'Verifikasi gagal, silakan coba lagi';
   }
 
@@ -251,9 +261,10 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
         color: Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _controllers[index].text.isNotEmpty 
-            ? Color(0xFF667eea) 
-            : Colors.grey[300]!,
+          color:
+              _controllers[index].text.isNotEmpty
+                  ? Color(0xFF667eea)
+                  : Colors.grey[300]!,
           width: 2,
         ),
       ),
@@ -268,14 +279,11 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
         ),
         keyboardType: TextInputType.number,
         maxLength: 1,
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          counterText: '',
-        ),
+        decoration: InputDecoration(border: InputBorder.none, counterText: ''),
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: (value) {
           setState(() {}); // Update border color
-          
+
           if (value.isNotEmpty) {
             if (index < 5) {
               _focusNodes[index + 1].requestFocus();
@@ -309,10 +317,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF667eea),
-              Color(0xFF764ba2),
-            ],
+            colors: [Color(0xFF667eea), Color(0xFF764ba2)],
           ),
         ),
         child: SafeArea(
@@ -325,7 +330,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: IconButton(
@@ -349,7 +354,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
                   ],
                 ),
               ),
-              
+
               // Content
               Expanded(
                 child: SingleChildScrollView(
@@ -364,7 +369,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
                           Container(
                             padding: EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
+                              color: Colors.white.withValues(alpha: 0.1),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -391,11 +396,14 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
                               text: TextSpan(
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.white.withOpacity(0.8),
+                                  color: Colors.white.withValues(alpha: 0.8),
                                   height: 1.5,
                                 ),
                                 children: [
-                                  TextSpan(text: 'Kami telah mengirim kode verifikasi 6 digit ke '),
+                                  TextSpan(
+                                    text:
+                                        'Kami telah mengirim kode verifikasi 6 digit ke ',
+                                  ),
                                   TextSpan(
                                     text: widget.email,
                                     style: TextStyle(
@@ -408,7 +416,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
                             ),
                           ),
                           SizedBox(height: 40),
-                          
+
                           // Form Section
                           Container(
                             padding: EdgeInsets.all(32),
@@ -417,7 +425,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha: 0.1),
                                   blurRadius: 20,
                                   offset: Offset(0, 10),
                                 ),
@@ -434,25 +442,38 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
                                   ),
                                 ),
                                 SizedBox(height: 24),
-                                
+
                                 // Error Message
                                 if (_errorMessage != null) ...[
                                   AnimatedBuilder(
                                     animation: _shakeAnimation,
                                     builder: (context, child) {
                                       return Transform.translate(
-                                        offset: Offset(_shakeAnimation.value * 10 * (1 - _shakeAnimation.value), 0),
+                                        offset: Offset(
+                                          _shakeAnimation.value *
+                                              10 *
+                                              (1 - _shakeAnimation.value),
+                                          0,
+                                        ),
                                         child: Container(
                                           width: double.infinity,
                                           padding: EdgeInsets.all(16),
                                           decoration: BoxDecoration(
                                             color: Colors.red[50],
-                                            borderRadius: BorderRadius.circular(12),
-                                            border: Border.all(color: Colors.red[200]!),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            border: Border.all(
+                                              color: Colors.red[200]!,
+                                            ),
                                           ),
                                           child: Row(
                                             children: [
-                                              Icon(Icons.error_outline, color: Colors.red[600], size: 20),
+                                              Icon(
+                                                Icons.error_outline,
+                                                color: Colors.red[600],
+                                                size: 20,
+                                              ),
                                               SizedBox(width: 8),
                                               Expanded(
                                                 child: Text(
@@ -471,26 +492,35 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
                                   ),
                                   SizedBox(height: 24),
                                 ],
-                                
+
                                 // OTP Input Fields
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: List.generate(6, (index) => _buildOtpField(index)),
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: List.generate(
+                                    6,
+                                    (index) => _buildOtpField(index),
+                                  ),
                                 ),
                                 SizedBox(height: 32),
-                                
+
                                 // Verify Button
                                 Container(
                                   width: double.infinity,
                                   height: 56,
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                                      colors: [
+                                        Color(0xFF667eea),
+                                        Color(0xFF764ba2),
+                                      ],
                                     ),
                                     borderRadius: BorderRadius.circular(12),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Color(0xFF667eea).withOpacity(0.3),
+                                        color: Color(
+                                          0xFF667eea,
+                                        ).withValues(alpha: 0.3),
                                         blurRadius: 8,
                                         offset: Offset(0, 4),
                                       ),
@@ -505,42 +535,45 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                    child: _isLoading
-                                        ? Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              SizedBox(
-                                                width: 24,
-                                                height: 24,
-                                                child: CircularProgressIndicator(
-                                                  color: Colors.white,
-                                                  strokeWidth: 2,
+                                    child:
+                                        _isLoading
+                                            ? Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                SizedBox(
+                                                  width: 24,
+                                                  height: 24,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        color: Colors.white,
+                                                        strokeWidth: 2,
+                                                      ),
                                                 ),
-                                              ),
-                                              SizedBox(width: 12),
-                                              Text(
-                                                'MEMVERIFIKASI...',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
+                                                SizedBox(width: 12),
+                                                Text(
+                                                  'MEMVERIFIKASI...',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
                                                 ),
+                                              ],
+                                            )
+                                            : Text(
+                                              'VERIFIKASI',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                letterSpacing: 1,
                                               ),
-                                            ],
-                                          )
-                                        : Text(
-                                            'VERIFIKASI',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              letterSpacing: 1,
                                             ),
-                                          ),
                                   ),
                                 ),
                                 SizedBox(height: 24),
-                                
+
                                 // Resend Section
                                 if (_resendCountdown > 0)
                                   Text(
@@ -553,34 +586,41 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> with TickerProviderSt
                                 else
                                   TextButton(
                                     onPressed: _isResending ? null : _resendOtp,
-                                    child: _isResending
-                                        ? Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              SizedBox(
-                                                width: 16,
-                                                height: 16,
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                  color: Color(0xFF667eea),
+                                    child:
+                                        _isResending
+                                            ? Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                SizedBox(
+                                                  width: 16,
+                                                  height: 16,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                        color: Color(
+                                                          0xFF667eea,
+                                                        ),
+                                                      ),
                                                 ),
+                                                SizedBox(width: 8),
+                                                Text(
+                                                  'Mengirim...',
+                                                  style: TextStyle(
+                                                    color: Color(0xFF667eea),
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                            : Text(
+                                              'Tidak menerima kode? Kirim ulang',
+                                              style: TextStyle(
+                                                color: Color(0xFF667eea),
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                decoration:
+                                                    TextDecoration.underline,
                                               ),
-                                              SizedBox(width: 8),
-                                              Text(
-                                                'Mengirim...',
-                                                style: TextStyle(color: Color(0xFF667eea)),
-                                              ),
-                                            ],
-                                          )
-                                        : Text(
-                                            'Tidak menerima kode? Kirim ulang',
-                                            style: TextStyle(
-                                              color: Color(0xFF667eea),
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              decoration: TextDecoration.underline,
                                             ),
-                                          ),
                                   ),
                               ],
                             ),

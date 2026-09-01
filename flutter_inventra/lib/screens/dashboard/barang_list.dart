@@ -9,7 +9,7 @@ class BarangListScreen extends StatefulWidget {
   const BarangListScreen({super.key});
 
   @override
-  _BarangListScreenState createState() => _BarangListScreenState();
+  State<BarangListScreen> createState() => _BarangListScreenState();
 }
 
 class _BarangListScreenState extends State<BarangListScreen> {
@@ -18,7 +18,7 @@ class _BarangListScreenState extends State<BarangListScreen> {
   List<Barang> _filteredBarang = [];
   bool _isLoading = false;
   bool _isSearching = false;
-  
+
   final TextEditingController _searchController = TextEditingController();
   String _selectedCategory = 'Semua';
   List<String> _categories = ['Semua'];
@@ -52,7 +52,7 @@ class _BarangListScreenState extends State<BarangListScreen> {
       }
 
       final barangList = await apiService.getBarangList(authService.token!);
-      
+
       setState(() {
         _allBarang = barangList;
         _filteredBarang = barangList;
@@ -84,13 +84,16 @@ class _BarangListScreenState extends State<BarangListScreen> {
   void _filterBarang() {
     String query = _searchController.text.toLowerCase();
     setState(() {
-      _filteredBarang = _allBarang.where((barang) {
-        final matchesSearch = barang.namaBarang.toLowerCase().contains(query) ||
-            barang.kodeBarang.toLowerCase().contains(query);
-        final matchesCategory = _selectedCategory == 'Semua' || 
-            barang.kategori == _selectedCategory;
-        return matchesSearch && matchesCategory;
-      }).toList();
+      _filteredBarang =
+          _allBarang.where((barang) {
+            final matchesSearch =
+                barang.namaBarang.toLowerCase().contains(query) ||
+                barang.kodeBarang.toLowerCase().contains(query);
+            final matchesCategory =
+                _selectedCategory == 'Semua' ||
+                barang.kategori == _selectedCategory;
+            return matchesSearch && matchesCategory;
+          }).toList();
     });
   }
 
@@ -117,6 +120,10 @@ class _BarangListScreenState extends State<BarangListScreen> {
   }
 
   Future<void> _logout() async {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final navigator = Navigator.of(context);
+
     final bool? shouldLogout = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -156,31 +163,29 @@ class _BarangListScreenState extends State<BarangListScreen> {
           _isLoading = true;
         });
 
-        final authService = Provider.of<AuthService>(context, listen: false);
         await authService.logout();
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Logout berhasil'),
-              backgroundColor: Colors.green,
-            ),
-          );
 
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            '/login',
-            (Route<dynamic> route) => false,
-          );
-        }
+        if (!mounted) return;
+        messenger?.showSnackBar(
+          const SnackBar(
+            content: Text('Logout berhasil'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        if (!mounted) return;
+        navigator.pushNamedAndRemoveUntil(
+          '/login',
+          (Route<dynamic> route) => false,
+        );
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error logout: ${e.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+        if (!mounted) return;
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+          SnackBar(
+            content: Text('Error logout: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       } finally {
         if (mounted) {
           setState(() {
@@ -192,10 +197,7 @@ class _BarangListScreenState extends State<BarangListScreen> {
   }
 
   String _formatRupiah(int amount) {
-    return 'Rp ${amount.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]}.',
-    )}';
+    return 'Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
   }
 
   @override
@@ -206,18 +208,22 @@ class _BarangListScreenState extends State<BarangListScreen> {
         elevation: 0,
         backgroundColor: Colors.blue[700],
         foregroundColor: Colors.white,
-        title: _isSearching
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  hintText: 'Cari barang...',
-                  hintStyle: TextStyle(color: Colors.white70),
-                  border: InputBorder.none,
+        title:
+            _isSearching
+                ? TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    hintText: 'Cari barang...',
+                    hintStyle: TextStyle(color: Colors.white70),
+                    border: InputBorder.none,
+                  ),
+                )
+                : const Text(
+                  'Daftar Barang',
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-              )
-            : const Text('Daftar Barang', style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search),
@@ -226,10 +232,11 @@ class _BarangListScreenState extends State<BarangListScreen> {
           if (!_isSearching) ...[
             IconButton(
               icon: const Icon(Icons.add_box_rounded),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => BarangFormScreen()),
-              ).then((_) => _refreshData()),
+              onPressed:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => BarangFormScreen()),
+                  ).then((_) => _refreshData()),
             ),
             IconButton(
               icon: const Icon(Icons.refresh_rounded),
@@ -292,12 +299,15 @@ class _BarangListScreenState extends State<BarangListScreen> {
                           isExpanded: true,
                           underline: Container(),
                           onChanged: _onCategoryChanged,
-                          items: _categories.map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
+                          items:
+                              _categories.map<DropdownMenuItem<String>>((
+                                String value,
+                              ) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
                         ),
                       ),
                     ),
@@ -305,7 +315,7 @@ class _BarangListScreenState extends State<BarangListScreen> {
                 ),
               ),
               const Divider(height: 1),
-              
+
               // List Barang
               Expanded(
                 child: FutureBuilder<List<Barang>>(
@@ -334,7 +344,7 @@ class _BarangListScreenState extends State<BarangListScreen> {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.1),
+                                color: Colors.grey.withValues(alpha: 0.1),
                                 spreadRadius: 1,
                                 blurRadius: 6,
                                 offset: const Offset(0, 3),
@@ -344,11 +354,16 @@ class _BarangListScreenState extends State<BarangListScreen> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                              const Icon(
+                                Icons.error_outline,
+                                size: 64,
+                                color: Colors.red,
+                              ),
                               const SizedBox(height: 16),
                               Text(
                                 'Terjadi Kesalahan',
-                                style: Theme.of(context).textTheme.headlineSmall,
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall,
                               ),
                               const SizedBox(height: 8),
                               Text(
@@ -369,10 +384,11 @@ class _BarangListScreenState extends State<BarangListScreen> {
                     }
 
                     if (_filteredBarang.isEmpty) {
-                      String emptyMessage = _allBarang.isEmpty 
-                          ? 'Belum ada data barang'
-                          : 'Tidak ada barang yang sesuai dengan pencarian';
-                      
+                      String emptyMessage =
+                          _allBarang.isEmpty
+                              ? 'Belum ada data barang'
+                              : 'Tidak ada barang yang sesuai dengan pencarian';
+
                       return Center(
                         child: Container(
                           margin: const EdgeInsets.all(32),
@@ -382,7 +398,7 @@ class _BarangListScreenState extends State<BarangListScreen> {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.1),
+                                color: Colors.grey.withValues(alpha: 0.1),
                                 spreadRadius: 1,
                                 blurRadius: 6,
                                 offset: const Offset(0, 3),
@@ -393,16 +409,17 @@ class _BarangListScreenState extends State<BarangListScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                _allBarang.isEmpty ? Icons.inventory_2_outlined : Icons.search_off,
-                                size: 64, 
-                                color: Colors.grey[400]
+                                _allBarang.isEmpty
+                                    ? Icons.inventory_2_outlined
+                                    : Icons.search_off,
+                                size: 64,
+                                color: Colors.grey[400],
                               ),
                               const SizedBox(height: 16),
                               Text(
                                 emptyMessage,
-                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
+                                style: Theme.of(context).textTheme.headlineSmall
+                                    ?.copyWith(color: Colors.grey[600]),
                               ),
                               if (_allBarang.isEmpty) ...[
                                 const SizedBox(height: 16),
@@ -434,12 +451,16 @@ class _BarangListScreenState extends State<BarangListScreen> {
                               ),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(12),
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => BarangFormScreen(barang: barang),
-                                  ),
-                                ).then((_) => _refreshData()),
+                                onTap:
+                                    () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => BarangFormScreen(
+                                              barang: barang,
+                                            ),
+                                      ),
+                                    ).then((_) => _refreshData()),
                                 child: Padding(
                                   padding: const EdgeInsets.all(16),
                                   child: Row(
@@ -450,7 +471,9 @@ class _BarangListScreenState extends State<BarangListScreen> {
                                         height: 48,
                                         decoration: BoxDecoration(
                                           color: Colors.blue[50],
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
                                         child: Icon(
                                           Icons.inventory_2,
@@ -459,11 +482,12 @@ class _BarangListScreenState extends State<BarangListScreen> {
                                         ),
                                       ),
                                       const SizedBox(width: 16),
-                                      
+
                                       // Info Barang
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               barang.namaBarang,
@@ -482,13 +506,15 @@ class _BarangListScreenState extends State<BarangListScreen> {
                                             ),
                                             const SizedBox(height: 4),
                                             Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 8,
-                                                vertical: 2,
-                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 2,
+                                                  ),
                                               decoration: BoxDecoration(
                                                 color: Colors.grey[200],
-                                                borderRadius: BorderRadius.circular(4),
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
                                               ),
                                               child: Text(
                                                 barang.kategori,
@@ -501,10 +527,11 @@ class _BarangListScreenState extends State<BarangListScreen> {
                                           ],
                                         ),
                                       ),
-                                      
+
                                       // Harga dan Stok
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
                                         children: [
                                           Text(
                                             _formatRupiah(barang.hargaSatuan),
@@ -538,7 +565,7 @@ class _BarangListScreenState extends State<BarangListScreen> {
               ),
             ],
           ),
-          
+
           // Loading overlay
           if (_isLoading)
             Container(

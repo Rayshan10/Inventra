@@ -5,26 +5,42 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter_tokobuku/main.dart';
+import 'package:flutter_tokobuku/services/api_service.dart';
+import 'package:flutter_tokobuku/services/auth_service.dart';
+import 'package:flutter_tokobuku/screens/auth/login.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp());
+  testWidgets('MyApp displays login screen when unauthenticated', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.clear();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    final apiService = ApiService(
+      baseUrl: 'http://localhost:3000',
+      client: http.Client(),
+    );
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          Provider<ApiService>.value(value: apiService),
+          ChangeNotifierProvider<AuthService>(
+            create: (_) => AuthService(apiService: apiService),
+          ),
+        ],
+        child: const MyApp(),
+      ),
+    );
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(find.byType(LoginScreen), findsOneWidget);
   });
 }

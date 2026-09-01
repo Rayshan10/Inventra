@@ -7,10 +7,11 @@ class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  _RegisterScreenState createState() => _RegisterScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStateMixin {
+class _RegisterScreenState extends State<RegisterScreen>
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _namaController = TextEditingController();
   final _emailController = TextEditingController();
@@ -18,7 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
   bool _isLoading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
-  
+
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -30,23 +31,18 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
       duration: Duration(milliseconds: 1500),
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
     _slideAnimation = Tween<Offset>(
       begin: Offset(0, 0.5),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
-    
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
+
     _animationController.forward();
   }
 
@@ -58,19 +54,23 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
       _errorMessage = null;
     });
 
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final navigator = Navigator.of(context);
+
     try {
-      await Provider.of<AuthService>(context, listen: false).register(
+      await authService.register(
         _namaController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
-      // Navigasi dengan membawa data email
-      Navigator.pushReplacement(
-        context,
+      if (!mounted) return;
+
+      navigator.pushReplacement(
         PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => 
-            VerifyOtpScreen(email: _emailController.text.trim()),
+          pageBuilder:
+              (context, animation, secondaryAnimation) =>
+                  VerifyOtpScreen(email: _emailController.text.trim()),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return SlideTransition(
               position: Tween<Offset>(
@@ -83,10 +83,10 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = e.toString().replaceAll('Exception: ', '');
 
-        // Tampilkan pesan lebih user-friendly
         if (_errorMessage!.contains('already registered')) {
           _errorMessage = 'Email sudah terdaftar';
         } else if (_errorMessage!.contains('Server busy')) {
@@ -94,9 +94,11 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
         }
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -108,10 +110,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF667eea),
-              Color(0xFF764ba2),
-            ],
+            colors: [Color(0xFF667eea), Color(0xFF764ba2)],
           ),
         ),
         child: SafeArea(
@@ -124,7 +123,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: IconButton(
@@ -148,7 +147,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                   ],
                 ),
               ),
-              
+
               // Content
               Expanded(
                 child: SingleChildScrollView(
@@ -163,7 +162,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                           Container(
                             padding: EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
+                              color: Colors.white.withValues(alpha: 0.1),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -187,12 +186,12 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                             'Buat akun baru untuk mulai berbelanja',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.white.withValues(alpha: 0.8),
                             ),
                             textAlign: TextAlign.center,
                           ),
                           SizedBox(height: 40),
-                          
+
                           // Form Section
                           Container(
                             padding: EdgeInsets.all(32),
@@ -201,7 +200,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha: 0.1),
                                   blurRadius: 20,
                                   offset: Offset(0, 10),
                                 ),
@@ -219,11 +218,17 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                                       decoration: BoxDecoration(
                                         color: Colors.red[50],
                                         borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: Colors.red[200]!),
+                                        border: Border.all(
+                                          color: Colors.red[200]!,
+                                        ),
                                       ),
                                       child: Row(
                                         children: [
-                                          Icon(Icons.error_outline, color: Colors.red[600], size: 20),
+                                          Icon(
+                                            Icons.error_outline,
+                                            color: Colors.red[600],
+                                            size: 20,
+                                          ),
                                           SizedBox(width: 8),
                                           Expanded(
                                             child: Text(
@@ -239,7 +244,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                                     ),
                                     SizedBox(height: 20),
                                   ],
-                                  
+
                                   // Nama Field
                                   TextFormField(
                                     controller: _namaController,
@@ -249,10 +254,17 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                                       prefixIcon: Container(
                                         margin: EdgeInsets.all(8),
                                         decoration: BoxDecoration(
-                                          color: Color(0xFF667eea).withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(8),
+                                          color: Color(
+                                            0xFF667eea,
+                                          ).withValues(alpha: 0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
-                                        child: Icon(Icons.person_outline, color: Color(0xFF667eea)),
+                                        child: Icon(
+                                          Icons.person_outline,
+                                          color: Color(0xFF667eea),
+                                        ),
                                       ),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
@@ -260,7 +272,10 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                                       ),
                                       filled: true,
                                       fillColor: Colors.grey[50],
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 16,
+                                      ),
                                     ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
@@ -273,7 +288,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                                     },
                                   ),
                                   SizedBox(height: 20),
-                                  
+
                                   // Email Field
                                   TextFormField(
                                     controller: _emailController,
@@ -283,10 +298,17 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                                       prefixIcon: Container(
                                         margin: EdgeInsets.all(8),
                                         decoration: BoxDecoration(
-                                          color: Color(0xFF667eea).withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(8),
+                                          color: Color(
+                                            0xFF667eea,
+                                          ).withValues(alpha: 0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
-                                        child: Icon(Icons.email_outlined, color: Color(0xFF667eea)),
+                                        child: Icon(
+                                          Icons.email_outlined,
+                                          color: Color(0xFF667eea),
+                                        ),
                                       ),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
@@ -294,21 +316,26 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                                       ),
                                       filled: true,
                                       fillColor: Colors.grey[50],
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 16,
+                                      ),
                                     ),
                                     keyboardType: TextInputType.emailAddress,
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return 'Masukkan alamat email Anda';
                                       }
-                                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                                      if (!RegExp(
+                                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                      ).hasMatch(value)) {
                                         return 'Masukkan email yang valid';
                                       }
                                       return null;
                                     },
                                   ),
                                   SizedBox(height: 20),
-                                  
+
                                   // Password Field
                                   TextFormField(
                                     controller: _passwordController,
@@ -318,19 +345,29 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                                       prefixIcon: Container(
                                         margin: EdgeInsets.all(8),
                                         decoration: BoxDecoration(
-                                          color: Color(0xFF667eea).withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(8),
+                                          color: Color(
+                                            0xFF667eea,
+                                          ).withValues(alpha: 0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
-                                        child: Icon(Icons.lock_outline, color: Color(0xFF667eea)),
+                                        child: Icon(
+                                          Icons.lock_outline,
+                                          color: Color(0xFF667eea),
+                                        ),
                                       ),
                                       suffixIcon: IconButton(
                                         icon: Icon(
-                                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                          _obscurePassword
+                                              ? Icons.visibility_off
+                                              : Icons.visibility,
                                           color: Colors.grey[600],
                                         ),
                                         onPressed: () {
                                           setState(() {
-                                            _obscurePassword = !_obscurePassword;
+                                            _obscurePassword =
+                                                !_obscurePassword;
                                           });
                                         },
                                       ),
@@ -340,7 +377,10 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                                       ),
                                       filled: true,
                                       fillColor: Colors.grey[50],
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 16,
+                                      ),
                                     ),
                                     obscureText: _obscurePassword,
                                     validator: (value) {
@@ -353,27 +393,34 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                                       return null;
                                     },
                                   ),
-                                  
+
                                   // Password Strength Indicator
                                   if (_passwordController.text.isNotEmpty) ...[
                                     SizedBox(height: 12),
-                                    _buildPasswordStrengthIndicator(_passwordController.text),
+                                    _buildPasswordStrengthIndicator(
+                                      _passwordController.text,
+                                    ),
                                   ],
-                                  
+
                                   SizedBox(height: 30),
-                                  
+
                                   // Register Button
                                   Container(
                                     width: double.infinity,
                                     height: 56,
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
-                                        colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                                        colors: [
+                                          Color(0xFF667eea),
+                                          Color(0xFF764ba2),
+                                        ],
                                       ),
                                       borderRadius: BorderRadius.circular(12),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Color(0xFF667eea).withOpacity(0.3),
+                                          color: Color(
+                                            0xFF667eea,
+                                          ).withValues(alpha: 0.3),
                                           blurRadius: 8,
                                           offset: Offset(0, 4),
                                         ),
@@ -385,27 +432,31 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                                         backgroundColor: Colors.transparent,
                                         shadowColor: Colors.transparent,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                       ),
-                                      child: _isLoading
-                                          ? SizedBox(
-                                              width: 24,
-                                              height: 24,
-                                              child: CircularProgressIndicator(
-                                                color: Colors.white,
-                                                strokeWidth: 2,
+                                      child:
+                                          _isLoading
+                                              ? SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      color: Colors.white,
+                                                      strokeWidth: 2,
+                                                    ),
+                                              )
+                                              : Text(
+                                                'DAFTAR',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  letterSpacing: 1,
+                                                ),
                                               ),
-                                            )
-                                          : Text(
-                                              'DAFTAR',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                letterSpacing: 1,
-                                              ),
-                                            ),
                                     ),
                                   ),
                                 ],
@@ -413,7 +464,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                             ),
                           ),
                           SizedBox(height: 24),
-                          
+
                           // Login Link
                           Container(
                             padding: EdgeInsets.symmetric(vertical: 16),
@@ -423,7 +474,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                                 Text(
                                   'Sudah punya akun? ',
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8),
+                                    color: Colors.white.withValues(alpha: 0.8),
                                     fontSize: 14,
                                   ),
                                 ),
@@ -460,7 +511,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     int strength = _calculatePasswordStrength(password);
     Color color;
     String text;
-    
+
     if (strength == 0) {
       color = Colors.red;
       text = 'Lemah';
@@ -471,7 +522,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
       color = Colors.green;
       text = 'Kuat';
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -513,15 +564,18 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
 
   int _calculatePasswordStrength(String password) {
     if (password.length < 6) return 0;
-    
+
     int score = 0;
-    
+
     // Length check
     if (password.length >= 8) score++;
-    
+
     // Contains numbers and letters
-    if (password.contains(RegExp(r'[0-9]')) && password.contains(RegExp(r'[a-zA-Z]'))) score++;
-    
+    if (password.contains(RegExp(r'[0-9]')) &&
+        password.contains(RegExp(r'[a-zA-Z]'))) {
+      score++;
+    }
+
     return score > 2 ? 2 : score;
   }
 
