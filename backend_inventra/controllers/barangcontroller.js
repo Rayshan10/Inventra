@@ -55,7 +55,10 @@ exports.createBarang = async (req, res) => {
 
     // Validasi input
     const requiredFields = ['kode_barang', 'nama_barang', 'kategori', 'harga_satuan', 'harga_pak', 'stok'];
-    const missingFields = requiredFields.filter(field => !req.body[field]);
+    const missingFields = requiredFields.filter(field => {
+      const value = req.body[field];
+      return value === undefined || value === null || value === '';
+    });
 
     if (missingFields.length > 0) {
       return res.status(400).json({
@@ -72,7 +75,7 @@ exports.createBarang = async (req, res) => {
       });
     }
 
-    if (stok < 0 || harga_satuan < 0 || harga_pak < 0) {
+    if (Number(stok) < 0 || Number(harga_satuan) < 0 || Number(harga_pak) < 0) {
       return res.status(400).json({
         success: false,
         message: 'Harga dan stok tidak boleh negatif'

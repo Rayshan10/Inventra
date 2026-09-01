@@ -48,7 +48,11 @@ class _BarangFormScreenState extends State<BarangFormScreen> {
 
     if (_barang.hargaSatuan <= 0 || _barang.hargaPak <= 0 || _barang.stok < 0) {
       messenger?.showSnackBar(
-        const SnackBar(content: Text('Harga dan stok harus lebih dari 0')),
+        const SnackBar(
+          content: Text(
+            'Harga harus lebih dari 0 dan stok tidak boleh negatif',
+          ),
+        ),
       );
       return;
     }
@@ -243,6 +247,9 @@ class _BarangFormScreenState extends State<BarangFormScreen> {
                   }
                   if (int.tryParse(value) == null) {
                     return 'Harap masukkan angka yang valid';
+                  }
+                  if (int.parse(value) < 0) {
+                    return 'Stok tidak boleh negatif';
                   }
                   return null;
                 },

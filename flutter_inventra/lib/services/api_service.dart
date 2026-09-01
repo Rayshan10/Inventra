@@ -123,7 +123,12 @@ class ApiService {
         final responseData = json.decode(response.body) as Map<String, dynamic>;
         return Barang.fromJson(responseData['data'] as Map<String, dynamic>);
       } else {
-        throw Exception('Failed to update barang: ${response.statusCode}');
+        final errorResponse = json.decode(response.body);
+        final errorMsg =
+            errorResponse['message'] ??
+            errorResponse['error'] ??
+            'Failed to update barang: ${response.statusCode}';
+        throw Exception(errorMsg);
       }
     } catch (e) {
       debugPrint('Update barang error: $e');
