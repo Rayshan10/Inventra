@@ -4,9 +4,10 @@ import '../../models/barang.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import 'barang_form.dart';
-import 'package:http/http.dart' as http;
 
 class BarangListScreen extends StatefulWidget {
+  const BarangListScreen({super.key});
+
   @override
   _BarangListScreenState createState() => _BarangListScreenState();
 }

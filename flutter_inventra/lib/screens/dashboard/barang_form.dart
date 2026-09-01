@@ -3,12 +3,11 @@ import 'package:provider/provider.dart';
 import '../../models/barang.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
-import 'package:http/http.dart' as http;
 
 class BarangFormScreen extends StatefulWidget {
   final Barang? barang;
 
-  const BarangFormScreen({Key? key, this.barang}) : super(key: key);
+  const BarangFormScreen({super.key, this.barang});
 
   @override
   _BarangFormScreenState createState() => _BarangFormScreenState();

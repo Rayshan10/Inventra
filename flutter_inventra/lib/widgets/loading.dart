@@ -4,7 +4,7 @@ class LoadingOverlay extends StatelessWidget {
   final Widget child;
   final bool isLoading;
 
-  const LoadingOverlay({
+  const LoadingOverlay({super.key, 
     required this.child,
     required this.isLoading,
   });

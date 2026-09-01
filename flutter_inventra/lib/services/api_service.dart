@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import '../models/barang.dart';
-import '../models/user.dart';
 
 class ApiService {
   final String baseUrl;
@@ -68,8 +67,8 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        if (data == null) throw Exception('Data barang kosong');
+        final responseData = json.decode(response.body) as Map<String, dynamic>;
+        final List<dynamic> data = responseData['data'] as List<dynamic>? ?? [];
         return data.map((json) => Barang.fromJson(json)).toList();
       } else {
         throw Exception('Failed to load barang: ${response.statusCode}');
@@ -92,7 +91,8 @@ class ApiService {
       );
 
       if (response.statusCode == 201) {
-        return Barang.fromJson(json.decode(response.body));
+        final responseData = json.decode(response.body) as Map<String, dynamic>;
+        return Barang.fromJson(responseData['data'] as Map<String, dynamic>);
       } else {
         // Coba parse error message dari server
         final errorResponse = json.decode(response.body);
@@ -120,7 +120,8 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        return Barang.fromJson(json.decode(response.body));
+        final responseData = json.decode(response.body) as Map<String, dynamic>;
+        return Barang.fromJson(responseData['data'] as Map<String, dynamic>);
       } else {
         throw Exception('Failed to update barang: ${response.statusCode}');
       }
@@ -154,19 +155,6 @@ class ApiService {
     } catch (e) {
       debugPrint('Error in deleteBarang: $e');
       rethrow;
-    }
-  }
-
-  Future<dynamic> _handleResponse(http.Response response) async {
-    final responseData = json.decode(response.body);
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return responseData;
-    } else {
-      throw Exception(
-        responseData['message'] ??
-            'Request failed with status: ${response.statusCode}',
-      );
     }
   }
 

@@ -92,7 +92,7 @@ class User {
       nama: nama ?? this.nama,
       email: email ?? this.email,
       verified: verified ?? this.verified,
-      otpCode: otpCode ?? this.otpCode,
+      otpCode: otpCode ?? otpCode,
     );
   }
 

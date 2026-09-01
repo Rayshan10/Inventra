@@ -9,7 +9,6 @@ class AuthService with ChangeNotifier {
   String? _token;
   User? _user;
   bool _isInitialized = false;
-  bool _isAuthenticated = false;
 
   AuthService({required ApiService apiService}) : _apiService = apiService;
 
@@ -32,7 +31,6 @@ class AuthService with ChangeNotifier {
         }
       }
 
-      _isAuthenticated = _token != null && _user != null;
       _isInitialized = true;
       notifyListeners();
     } catch (e) {
@@ -48,13 +46,9 @@ class AuthService with ChangeNotifier {
       // Debug logging
       debugPrint('Login response: $response');
 
-      // Validate response structure
-      if (response == null) {
-        throw Exception('Response kosong dari server');
-      }
-
-      final token = response['token'];
-      final userData = response['user'];
+      final responseData = response['data'] as Map<String, dynamic>?;
+      final token = responseData?['token'];
+      final userData = responseData?['user'];
 
       if (token == null || token.toString().isEmpty) {
         throw Exception('Token tidak ditemukan dalam response');
@@ -117,11 +111,6 @@ class AuthService with ChangeNotifier {
       final response = await _apiService.verifyOTP(email, otp);
 
       debugPrint('Verify OTP response: $response');
-
-      // Validasi response
-      if (response == null) {
-        throw Exception('Response kosong dari server');
-      }
 
       // Periksa apakah response berisi error
       if (response['success'] == false || response['error'] == true) {
@@ -216,8 +205,6 @@ class AuthService with ChangeNotifier {
     try {
       _token = token;
       _user = user;
-      _isAuthenticated = true;
-
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', token);
       await prefs.setString('user', json.encode(user.toJson()));
@@ -235,8 +222,6 @@ class AuthService with ChangeNotifier {
     try {
       _token = null;
       _user = null;
-      _isAuthenticated = false;
-
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('token');
       await prefs.remove('user');
@@ -266,13 +251,8 @@ class AuthService with ChangeNotifier {
       // Verify token with server
       final userData = await _apiService.getProfile(token);
 
-      if (userData != null) {
-        await _saveAuthData(token, User.fromJson(userData));
-        return true;
-      } else {
-        await _clearAuthData();
-        return false;
-      }
+      await _saveAuthData(token, User.fromJson(userData));
+      return true;
     } catch (e) {
       debugPrint('Check auth status error: $e');
       await _clearAuthData();
