@@ -142,30 +142,47 @@ exports.updateBarang = async (req, res) => {
       });
     }
 
-    // Jangan izinkan update kode_barang
-    if (req.body.kode_barang) {
-      delete req.body.kode_barang;
+    const updateData = {};
+    const allowedFields = ['nama_barang', 'kategori', 'harga_satuan', 'harga_pak', 'stok'];
+
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
     }
 
-    // Validasi tipe data jika ada update harga/stok
-    if (req.body.harga_satuan !== undefined && isNaN(req.body.harga_satuan)) {
+    // Validasi dan normalisasi nilai numerik sebelum update.
+    if (updateData.harga_satuan !== undefined && isNaN(updateData.harga_satuan)) {
       return res.status(400).json({
         success: false,
         message: 'Harga satuan harus berupa angka'
       });
     }
 
-    if (req.body.harga_pak !== undefined && isNaN(req.body.harga_pak)) {
+    if (updateData.harga_pak !== undefined && isNaN(updateData.harga_pak)) {
       return res.status(400).json({
         success: false,
         message: 'Harga pak harus berupa angka'
       });
     }
 
+    if (updateData.stok !== undefined && isNaN(updateData.stok)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Stok harus berupa angka'
+      });
+    }
+
+    for (const field of ['harga_satuan', 'harga_pak', 'stok']) {
+      if (updateData[field] !== undefined) {
+        updateData[field] = Number(updateData[field]);
+      }
+    }
+
     // Update dengan validasi
     const updated = await Barang.findByIdAndUpdate(
       id,
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     );
 
@@ -184,6 +201,14 @@ exports.updateBarang = async (req, res) => {
 
   } catch (err) {
     console.error('Error updateBarang:', err);
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Data barang tidak valid',
+        error: err.message
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: 'Gagal memperbarui barang',

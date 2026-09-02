@@ -26,8 +26,12 @@ class _BarangListScreenState extends State<BarangListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadBarang();
     _searchController.addListener(_filterBarang);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadBarang();
+      }
+    });
   }
 
   @override
@@ -62,7 +66,7 @@ class _BarangListScreenState extends State<BarangListScreen> {
       return barangList;
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
             backgroundColor: Colors.red,

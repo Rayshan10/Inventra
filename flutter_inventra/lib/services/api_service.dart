@@ -44,7 +44,7 @@ class ApiService {
       );
 
       if (response.statusCode == 201) {
-        return json.decode(response.body);
+        return;
       } else {
         final errorData = json.decode(response.body);
         throw Exception(errorData['message'] ?? 'Registration failed');
@@ -189,7 +189,8 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        return json.decode(response.body);
+        final responseData = json.decode(response.body) as Map<String, dynamic>;
+        return responseData['data'] as Map<String, dynamic>;
       } else {
         throw Exception('Failed to get profile: ${response.statusCode}');
       }

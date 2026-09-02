@@ -11,7 +11,7 @@ import 'screens/auth/verify_otp.dart'; // Tambahkan import
 void main() {
   final httpClient = http.Client();
   final apiService = ApiService(
-    baseUrl: kDebugMode ? 'http://localhost:3000' : 'https://api.tokobuku.com',
+    baseUrl: kDebugMode ? 'http://127.0.0.1:3000' : 'https://api.tokobuku.com',
     client: httpClient,
   );
 

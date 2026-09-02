@@ -8,9 +8,6 @@ const TIPE_MUTASI = ['masuk', 'keluar', 'opname', 'retur'];
 
 // ===== Tambah Mutasi Stok =====
 exports.createMutasi = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
         const { barang_id, tipe, jumlah, keterangan, tanggal_mutasi } = req.body;
         const user_id = req.userId;
@@ -46,9 +43,8 @@ exports.createMutasi = async (req, res) => {
         }
 
         // Cari barang
-        const barang = await Barang.findById(barang_id).session(session);
+        const barang = await Barang.findById(barang_id);
         if (!barang) {
-            await session.abortTransaction();
             return res.status(404).json({
                 success: false,
                 message: 'Barang tidak ditemukan'
@@ -63,7 +59,6 @@ exports.createMutasi = async (req, res) => {
             stok_baru -= jumlah;
             // Validasi stok tidak boleh negatif
             if (stok_baru < 0) {
-                await session.abortTransaction();
                 return res.status(400).json({
                     success: false,
                     message: `Stok tidak cukup. Stok saat ini: ${barang.stok}, diminta keluar: ${jumlah}`
@@ -83,13 +78,11 @@ exports.createMutasi = async (req, res) => {
             tanggal_mutasi: tanggal_mutasi || Date.now()
         });
 
-        await mutasi.save({ session });
+        await mutasi.save();
 
         // Update stok barang
         barang.stok = stok_baru;
-        await barang.save({ session });
-
-        await session.commitTransaction();
+        await barang.save();
 
         // Return dengan data mutasi & barang terbaru
         res.status(201).json({
@@ -116,15 +109,12 @@ exports.createMutasi = async (req, res) => {
         });
 
     } catch (err) {
-        await session.abortTransaction();
         console.error('Error createMutasi:', err);
         res.status(500).json({
             success: false,
             message: 'Gagal membuat mutasi stok',
             error: err.message
         });
-    } finally {
-        session.endSession();
     }
 };
 

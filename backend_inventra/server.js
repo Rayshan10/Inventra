@@ -8,9 +8,13 @@ const PORT = process.env.PORT || 3000;
 
 // Konfigurasi CORS untuk production-ready
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production'
-    ? process.env.FRONTEND_URL
-    : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000'],
+  origin: (origin, callback) => {
+    if (process.env.NODE_ENV === 'production') {
+      return callback(null, origin === process.env.FRONTEND_URL);
+    }
+
+    return callback(null, true);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,

@@ -104,9 +104,9 @@ function BarangManagement() {
         const res = await axios.put(`/api/barang/${form._id}`, {
           nama_barang: form.nama_barang,
           kategori: form.kategori,
-          harga_satuan: form.harga_satuan,
-          harga_pak: form.harga_pak,
-          stok: form.stok
+          harga_satuan: Number(form.harga_satuan),
+          harga_pak: Number(form.harga_pak),
+          stok: Number(form.stok)
         }, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
