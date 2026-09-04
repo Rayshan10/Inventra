@@ -79,6 +79,23 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> getDashboardStats(String token) async {
+    final response = await client.get(
+      Uri.parse('$baseUrl/api/mutasi/stats'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body) as Map<String, dynamic>;
+      return responseData['data'] as Map<String, dynamic>;
+    }
+
+    throw Exception('Gagal memuat statistik dashboard: ${response.statusCode}');
+  }
+
   Future<Barang> createBarang(Barang barang, String token) async {
     try {
       final response = await client.post(

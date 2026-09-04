@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { BookOpen, Eye, EyeOff, LockKeyhole, Mail, LogIn } from 'lucide-react';
 import '../styles/login.css';
 
 function Login() {
@@ -50,74 +51,83 @@ function Login() {
         <div className="login-page">
             <div className="login-container">
                 <div className="">
+                    <div className="login-brand-mark" aria-hidden="true">
+                        <BookOpen size={42} strokeWidth={2.2} />
+                    </div>
                     <div className="login-header">
-                        <h2>Welcome Back</h2>
-                        <p>Please enter your credentials to login</p>
+                        <h1>TokoBuku</h1>
+                        <p>Selamat datang kembali</p>
                     </div>
 
-                    {message && (
-                        <div className={`alert ${error ? 'alert-error' : 'alert-success'}`}>
-                            {message}
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="login-form">
-                        <div className="form-group">
-                            <label htmlFor="email">Email Address</label>
-                            <input
-                                id="email"
-                                type="email"
-                                placeholder="Enter your email"
-                                value={form.email}
-                                onChange={e => setForm({ ...form, email: e.target.value })}
-                                required
-                                className="form-input"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="password">Password</label>
-                            <div className="password-input-container">
-                                <input
-                                    id="password"
-                                    type={passwordVisible ? "text" : "password"}
-                                    placeholder="Enter your password"
-                                    value={form.password}
-                                    onChange={e => setForm({ ...form, password: e.target.value })}
-                                    required
-                                    className="form-input"
-                                />
-                                <button
-                                    type="button"
-                                    className="password-toggle"
-                                    onClick={togglePasswordVisibility}
-                                    aria-label={passwordVisible ? "Hide password" : "Show password"}
-                                >
-                                    {passwordVisible ? '🙈' : '👁️'}
-                                </button>
+                    <div className="login-panel">
+                        {message && (
+                            <div className={`alert ${error ? 'alert-error' : 'alert-success'}`}>
+                                {message}
                             </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="login-form">
+                            <div className="form-group">
+                                <label htmlFor="email">Email</label>
+                                <div className="input-with-icon">
+                                    <Mail size={18} aria-hidden="true" />
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        placeholder="Masukkan email Anda"
+                                        value={form.email}
+                                        onChange={e => setForm({ ...form, email: e.target.value })}
+                                        required
+                                        className="form-input"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label htmlFor="password">Password</label>
+                                <div className="password-input-container">
+                                    <LockKeyhole className="field-icon" size={18} aria-hidden="true" />
+                                    <input
+                                        id="password"
+                                        type={passwordVisible ? "text" : "password"}
+                                        placeholder="Masukkan password Anda"
+                                        value={form.password}
+                                        onChange={e => setForm({ ...form, password: e.target.value })}
+                                        required
+                                        className="form-input"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="password-toggle"
+                                        onClick={togglePasswordVisibility}
+                                        aria-label={passwordVisible ? "Hide password" : "Show password"}
+                                    >
+                                        {passwordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
+                            </div>
+
+
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="login-button"
+                            >
+                                {loading ? (
+                                    <>
+                                        <span className="spinner"></span>
+                                        Signing in...
+                                    </>
+                                ) : (
+                                    <><LogIn size={18} /> MASUK</>
+                                )}
+                            </button>
+                        </form>
+
+                        <div className="login-footer">
+                            <p>Belum punya akun? <a href="/register" className="signup-link">Daftar</a></p>
                         </div>
-
-
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="login-button"
-                        >
-                            {loading ? (
-                                <>
-                                    <span className="spinner"></span>
-                                    Signing in...
-                                </>
-                            ) : (
-                                'Sign In'
-                            )}
-                        </button>
-                    </form>
-
-                    <div className="login-footer">
-                        <p>Don't have an account? <a href="/register" className="signup-link">Sign up</a></p>
                     </div>
                 </div>
             </div>

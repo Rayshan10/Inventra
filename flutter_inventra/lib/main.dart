@@ -123,7 +123,7 @@ class MyApp extends StatelessWidget {
           return Consumer<AuthService>(
             builder: (context, auth, _) {
               if (auth.isAuthenticated) {
-                return BarangListScreen();
+                return const HomeScreen();
               } else {
                 return LoginScreen();
               }

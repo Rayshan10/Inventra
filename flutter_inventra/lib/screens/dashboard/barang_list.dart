@@ -17,7 +17,6 @@ class _BarangListScreenState extends State<BarangListScreen> {
   late Future<List<Barang>> _barangFuture;
   List<Barang> _allBarang = [];
   List<Barang> _filteredBarang = [];
-  bool _isLoading = false;
   bool _isSearching = false;
 
   final TextEditingController _searchController = TextEditingController();
@@ -124,83 +123,6 @@ class _BarangListScreenState extends State<BarangListScreen> {
     });
   }
 
-  Future<void> _logout() async {
-    final authService = Provider.of<AuthService>(context, listen: false);
-    final messenger = ScaffoldMessenger.maybeOf(context);
-    final navigator = Navigator.of(context);
-
-    final bool? shouldLogout = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Row(
-            children: [
-              Icon(Icons.logout, color: Colors.red),
-              SizedBox(width: 8),
-              Text('Logout'),
-            ],
-          ),
-          content: const Text('Apakah Anda yakin ingin logout?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Batal'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Logout'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (shouldLogout == true) {
-      try {
-        setState(() {
-          _isLoading = true;
-        });
-
-        await authService.logout();
-
-        if (!mounted) return;
-        messenger?.showSnackBar(
-          const SnackBar(
-            content: Text('Logout berhasil'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        if (!mounted) return;
-        navigator.pushNamedAndRemoveUntil(
-          '/login',
-          (Route<dynamic> route) => false,
-        );
-      } catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-          SnackBar(
-            content: Text('Error logout: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      }
-    }
-  }
-
   String _formatRupiah(int amount) {
     return 'Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
   }
@@ -246,28 +168,6 @@ class _BarangListScreenState extends State<BarangListScreen> {
             IconButton(
               icon: const Icon(Icons.refresh_rounded),
               onPressed: _refreshData,
-            ),
-            PopupMenuButton<String>(
-              onSelected: (String value) {
-                if (value == 'logout') {
-                  _logout();
-                }
-              },
-              itemBuilder: (BuildContext context) {
-                return [
-                  const PopupMenuItem<String>(
-                    value: 'logout',
-                    child: Row(
-                      children: [
-                        Icon(Icons.logout, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Logout', style: TextStyle(color: Colors.red)),
-                      ],
-                    ),
-                  ),
-                ];
-              },
-              icon: const Icon(Icons.more_vert),
             ),
           ],
         ],
@@ -571,27 +471,6 @@ class _BarangListScreenState extends State<BarangListScreen> {
               ),
             ],
           ),
-
-          // Loading overlay
-          if (_isLoading)
-            Container(
-              color: Colors.black54,
-              child: const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Sedang logout...',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
-              ),
-            ),
         ],
       ),
     );

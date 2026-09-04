@@ -63,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen>
       );
 
       if (!mounted) return;
-      navigator.pushReplacementNamed('/barang_list');
+      navigator.pushReplacementNamed('/home');
     } catch (e) {
       if (!mounted) return;
       setState(() {

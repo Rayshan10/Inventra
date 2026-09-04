@@ -24,6 +24,60 @@
   transition: all 0.3s ease;
 }
 
+.login-brand-mark {
+  width: 92px;
+  height: 92px;
+  margin: 0 auto 20px;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  background: #2f80ed;
+  border-radius: 50%;
+}
+
+.login-header h1 {
+  color: #ffffff;
+  font-size: 32px;
+  line-height: 1.1;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.login-header p {
+  color: #d5e4f2;
+}
+
+.input-with-icon,
+.password-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-icon > svg,
+.field-icon {
+  position: absolute;
+  left: 14px;
+  color: #2f80ed;
+  z-index: 1;
+}
+
+.input-with-icon .form-input,
+.password-input-container .form-input {
+  padding-left: 44px;
+}
+
+.password-input-container .password-toggle {
+  color: #718191;
+  display: grid;
+  place-items: center;
+}
+
+.login-button {
+  min-height: 52px;
+  border-radius: 6px;
+}
+
 .login-header {
   margin-bottom: 30px;
   text-align: center;
@@ -205,6 +259,14 @@
     padding: 30px 20px;
   }
 
+  .login-container {
+    padding: 20px 16px;
+  }
+
+  .login-panel {
+    padding: 28px 22px;
+  }
+
   .login-header h2 {
     font-size: 24px;
   }
@@ -221,11 +283,28 @@
 }
 
 .login-container {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 18px 50px rgba(7, 27, 45, 0.25);
+  background: transparent;
   padding: clamp(24px, 5vw, 40px);
   width: 100%;
-  max-width: 450px;
+  max-width: 632px;
   transition: all 0.3s ease;
+}
+
+.login-panel {
+  background: #ffffff;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  border-radius: 8px;
+  box-shadow: 0 18px 50px rgba(7, 27, 45, 0.25);
+  padding: clamp(28px, 5vw, 44px) clamp(28px, 6vw, 52px);
+}
+
+.login-form .form-input {
+  min-height: 48px;
+  font-size: 15px;
+}
+
+.login-form {
+  gap: 24px;
 }
