@@ -4,6 +4,7 @@ import '../../models/barang.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import 'barang_form.dart';
+import '../../widgets/drawer.dart';
 
 class BarangListScreen extends StatefulWidget {
   const BarangListScreen({super.key});
@@ -210,7 +211,7 @@ class _BarangListScreenState extends State<BarangListScreen> {
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.blue[700],
+        backgroundColor: const Color(0xFF17324D),
         foregroundColor: Colors.white,
         title:
             _isSearching
@@ -271,6 +272,7 @@ class _BarangListScreenState extends State<BarangListScreen> {
           ],
         ],
       ),
+      drawer: const AppDrawer(),
       body: Stack(
         children: [
           Column(
@@ -474,14 +476,14 @@ class _BarangListScreenState extends State<BarangListScreen> {
                                         width: 48,
                                         height: 48,
                                         decoration: BoxDecoration(
-                                          color: Colors.blue[50],
+                                          color: const Color(0xFFEAF2FF),
                                           borderRadius: BorderRadius.circular(
                                             8,
                                           ),
                                         ),
                                         child: Icon(
                                           Icons.inventory_2,
-                                          color: Colors.blue[700],
+                                          color: const Color(0xFF2F80ED),
                                           size: 24,
                                         ),
                                       ),
@@ -542,7 +544,7 @@ class _BarangListScreenState extends State<BarangListScreen> {
                                             style: const TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.green,
+                                              color: Color(0xFF1D896F),
                                             ),
                                           ),
                                           const SizedBox(height: 4),

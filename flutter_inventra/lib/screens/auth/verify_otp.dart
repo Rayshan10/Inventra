@@ -263,7 +263,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
         border: Border.all(
           color:
               _controllers[index].text.isNotEmpty
-                  ? Color(0xFF667eea)
+                  ? Color(0xFF2F80ED)
                   : Colors.grey[300]!,
           width: 2,
         ),
@@ -275,7 +275,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
         style: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: Color(0xFF667eea),
+          color: Color(0xFF2F80ED),
         ),
         keyboardType: TextInputType.number,
         maxLength: 1,
@@ -317,7 +317,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+            colors: [Color(0xFF17324D), Color(0xFF2F80ED)],
           ),
         ),
         child: SafeArea(
@@ -511,15 +511,15 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
-                                        Color(0xFF667eea),
-                                        Color(0xFF764ba2),
+                                        Color(0xFF17324D),
+                                        Color(0xFF2F80ED),
                                       ],
                                     ),
                                     borderRadius: BorderRadius.circular(12),
                                     boxShadow: [
                                       BoxShadow(
                                         color: Color(
-                                          0xFF667eea,
+                                          0xFF2F80ED,
                                         ).withValues(alpha: 0.3),
                                         blurRadius: 8,
                                         offset: Offset(0, 4),
@@ -598,7 +598,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
                                                       CircularProgressIndicator(
                                                         strokeWidth: 2,
                                                         color: Color(
-                                                          0xFF667eea,
+                                                          0xFF2F80ED,
                                                         ),
                                                       ),
                                                 ),
@@ -606,7 +606,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
                                                 Text(
                                                   'Mengirim...',
                                                   style: TextStyle(
-                                                    color: Color(0xFF667eea),
+                                                    color: Color(0xFF2F80ED),
                                                   ),
                                                 ),
                                               ],
@@ -614,7 +614,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
                                             : Text(
                                               'Tidak menerima kode? Kirim ulang',
                                               style: TextStyle(
-                                                color: Color(0xFF667eea),
+                                                color: Color(0xFF2F80ED),
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w600,
                                                 decoration:

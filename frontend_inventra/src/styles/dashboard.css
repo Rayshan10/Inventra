@@ -1,16 +1,16 @@
 /* Base Styles */
 :root {
-  --primary: #3498db;
-  --primary-dark: #2980b9;
-  --secondary: #2ecc71;
-  --secondary-dark: #27ae60;
-  --danger: #e74c3c;
-  --danger-dark: #c0392b;
-  --dark: #2c3e50;
-  --light: #ecf0f1;
-  --gray: #95a5a6;
+  --primary: #2f80ed;
+  --primary-dark: #1769d1;
+  --secondary: #28a889;
+  --secondary-dark: #1d896f;
+  --danger: #d94b5b;
+  --danger-dark: #b93747;
+  --dark: #17324d;
+  --light: #eaf0f6;
+  --gray: #7a8b9a;
   --white: #ffffff;
-  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow: 0 10px 30px rgba(23, 50, 77, 0.08);
 }
 
 body {
@@ -23,15 +23,16 @@ body {
 .dashboard {
   display: flex;
   min-height: 100vh;
+  background: #f4f7fb;
 }
 
 /* Sidebar */
 .sidebar {
   width: 250px;
-  background-color: var(--dark);
+  background: #17324d;
   color: var(--white);
   padding: 20px 0;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 8px 0 24px rgba(23, 50, 77, 0.12);
   position: fixed;
   height: 100vh;
   z-index: 100;
@@ -76,8 +77,13 @@ body {
 }
 
 .sidebar a:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.08);
   padding-left: 25px;
+}
+
+.sidebar a.active {
+  background: #2f80ed;
+  font-weight: 700;
 }
 
 .sidebar a::before {
@@ -99,8 +105,8 @@ body {
 .content {
   flex: 1;
   margin-left: 250px;
-  padding: 30px;
-  background-color: #f5f7fa;
+  padding: 36px clamp(20px, 4vw, 56px);
+  background-color: #f4f7fb;
   min-height: 100vh;
 }
 
@@ -114,7 +120,8 @@ body {
 .content-header h2 {
   color: var(--dark);
   margin: 0;
-  font-size: 1.8rem;
+  font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+  letter-spacing: -0.02em;
 }
 
 .user-greeting {
@@ -125,10 +132,10 @@ body {
 /* Cards */
 .card {
   background-color: var(--white);
-  border-radius: 10px;
+  border-radius: 8px;
   box-shadow: var(--shadow);
-  padding: 25px;
-  margin-bottom: 30px;
+  padding: clamp(18px, 3vw, 28px);
+  margin-bottom: 24px;
 }
 
 /* Form Styles */
@@ -156,7 +163,7 @@ body {
 .form-control {
   width: 100%;
   padding: 12px 15px;
-  border: 1px solid #ddd;
+  border: 1px solid #d7e1ea;
   border-radius: 6px;
   font-size: 1rem;
   transition: all 0.2s;
@@ -165,7 +172,7 @@ body {
 .form-control:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.16);
 }
 
 select.form-control {
@@ -192,12 +199,13 @@ select.form-control {
 }
 
 .btn-primary {
-  background-color: var(--primary);
+  background: var(--primary);
   color: white;
 }
 
 .btn-primary:hover {
   background-color: var(--primary-dark);
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
@@ -338,7 +346,7 @@ select.form-control {
 }
 
 .kpi-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #17324d 0%, #2f80ed 100%);
   border-radius: 12px;
   padding: 25px;
   color: white;
@@ -357,27 +365,27 @@ select.form-control {
 }
 
 .kpi-total {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #17324d 0%, #2f80ed 100%);
 }
 
 .kpi-aman {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  background: linear-gradient(135deg, #197d6b 0%, #28a889 100%);
 }
 
 .kpi-menipis {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #bd741e 0%, #e4a23a 100%);
 }
 
 .kpi-habis {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  background: linear-gradient(135deg, #b93747 0%, #d94b5b 100%);
 }
 
 .kpi-nilai {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #1769d1 0%, #55a5f5 100%);
 }
 
 .kpi-action {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  background: linear-gradient(135deg, #1d896f 0%, #54c5a7 100%);
 }
 
 .kpi-icon {

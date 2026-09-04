@@ -110,7 +110,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+            colors: [Color(0xFF17324D), Color(0xFF2F80ED)],
           ),
         ),
         child: SafeArea(
@@ -255,7 +255,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                         margin: EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           color: Color(
-                                            0xFF667eea,
+                                            0xFF2F80ED,
                                           ).withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(
                                             8,
@@ -263,7 +263,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                         ),
                                         child: Icon(
                                           Icons.person_outline,
-                                          color: Color(0xFF667eea),
+                                          color: Color(0xFF2F80ED),
                                         ),
                                       ),
                                       border: OutlineInputBorder(
@@ -299,7 +299,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                         margin: EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           color: Color(
-                                            0xFF667eea,
+                                            0xFF2F80ED,
                                           ).withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(
                                             8,
@@ -307,7 +307,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                         ),
                                         child: Icon(
                                           Icons.email_outlined,
-                                          color: Color(0xFF667eea),
+                                          color: Color(0xFF2F80ED),
                                         ),
                                       ),
                                       border: OutlineInputBorder(
@@ -346,7 +346,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                         margin: EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           color: Color(
-                                            0xFF667eea,
+                                            0xFF2F80ED,
                                           ).withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(
                                             8,
@@ -354,7 +354,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                         ),
                                         child: Icon(
                                           Icons.lock_outline,
-                                          color: Color(0xFF667eea),
+                                          color: Color(0xFF2F80ED),
                                         ),
                                       ),
                                       suffixIcon: IconButton(
@@ -411,15 +411,15 @@ class _RegisterScreenState extends State<RegisterScreen>
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         colors: [
-                                          Color(0xFF667eea),
-                                          Color(0xFF764ba2),
+                                          Color(0xFF17324D),
+                                          Color(0xFF2F80ED),
                                         ],
                                       ),
                                       borderRadius: BorderRadius.circular(12),
                                       boxShadow: [
                                         BoxShadow(
                                           color: Color(
-                                            0xFF667eea,
+                                            0xFF2F80ED,
                                           ).withValues(alpha: 0.3),
                                           blurRadius: 8,
                                           offset: Offset(0, 4),

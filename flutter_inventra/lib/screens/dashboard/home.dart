@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../auth/login.dart';
-import 'barang_list.dart';
+import '../../widgets/drawer.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -11,7 +11,10 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dashboard'),
+        title: const Text(
+          'Dashboard',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
@@ -21,6 +24,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
+      drawer: const AppDrawer(),
       body: Consumer<AuthService>(
         builder: (context, authService, child) {
           // Redirect ke login jika tidak terautentikasi
@@ -34,30 +38,61 @@ class HomeScreen extends StatelessWidget {
             return Center(child: CircularProgressIndicator());
           }
 
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Welcome, ${authService.user?.nama ?? 'User'}!',
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+          return ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              Text(
+                'Selamat datang, ${authService.user?.nama ?? 'User'}',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: const Color(0xFF17324D),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Kelola persediaan toko dengan lebih mudah.',
+                style: TextStyle(color: Color(0xFF718191)),
+              ),
+              const SizedBox(height: 24),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFEAF2FF),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: const Icon(
+                          Icons.inventory_2_outlined,
+                          color: Color(0xFF2F80ED),
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      const Expanded(
+                        child: Text(
+                          'Data barang siap dikelola',
+                          style: TextStyle(
+                            color: Color(0xFF17324D),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Buka barang',
+                        onPressed:
+                            () => Navigator.pushNamed(context, '/barang_list'),
+                        icon: const Icon(Icons.arrow_forward),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BarangListScreen(),
-                      ),
-                    );
-                  },
-                  child: Text('Manage Barang'),
-                ),
-              ],
-            ),
+              ),
+            ],
           );
         },
       ),

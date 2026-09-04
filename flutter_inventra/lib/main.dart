@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'services/api_service.dart';
 import 'services/auth_service.dart';
 import 'screens/dashboard/barang_list.dart';
+import 'screens/dashboard/home.dart';
 import 'screens/auth/login.dart';
 import 'screens/auth/verify_otp.dart'; // Tambahkan import
 
@@ -37,11 +38,67 @@ class MyApp extends StatelessWidget {
       title: 'Toko Buku',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFFF4F7FB),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF2F80ED),
+          brightness: Brightness.light,
+          surface: Colors.white,
+        ).copyWith(
+          primary: const Color(0xFF2F80ED),
+          onPrimary: Colors.white,
+          secondary: const Color(0xFF28A889),
+          error: const Color(0xFFD94B5B),
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF17324D),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: false,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 15,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(6)),
+            borderSide: BorderSide(color: Color(0xFFD7E1EA)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(6)),
+            borderSide: BorderSide(color: Color(0xFFD7E1EA)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(6)),
+            borderSide: BorderSide(color: Color(0xFF2F80ED), width: 2),
+          ),
+        ),
+        cardTheme: const CardThemeData(
+          color: Colors.white,
+          elevation: 1,
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF2F80ED),
+            foregroundColor: Colors.white,
+            minimumSize: const Size(0, 48),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(6)),
+            ),
+          ),
+        ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       routes: {
         '/login': (context) => LoginScreen(),
+        '/home': (context) => const HomeScreen(),
         '/verify-otp': (context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map;
           return VerifyOtpScreen(email: args['email']);

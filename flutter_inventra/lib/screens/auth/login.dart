@@ -81,14 +81,9 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF17324D),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-          ),
-        ),
+        color: const Color(0xFF17324D),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -104,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen>
                       Container(
                         padding: EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
+                          color: const Color(0xFF2F80ED),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(Icons.book, size: 60, color: Colors.white),
@@ -134,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen>
                         padding: EdgeInsets.all(32),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(8),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.1),
@@ -190,13 +185,13 @@ class _LoginScreenState extends State<LoginScreen>
                                     margin: EdgeInsets.all(8),
                                     decoration: BoxDecoration(
                                       color: Color(
-                                        0xFF667eea,
+                                        0xFF2F80ED,
                                       ).withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Icon(
                                       Icons.email_outlined,
-                                      color: Color(0xFF667eea),
+                                      color: Color(0xFF2F80ED),
                                     ),
                                   ),
                                   border: OutlineInputBorder(
@@ -235,13 +230,13 @@ class _LoginScreenState extends State<LoginScreen>
                                     margin: EdgeInsets.all(8),
                                     decoration: BoxDecoration(
                                       color: Color(
-                                        0xFF667eea,
+                                        0xFF2F80ED,
                                       ).withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Icon(
                                       Icons.lock_outline,
-                                      color: Color(0xFF667eea),
+                                      color: Color(0xFF2F80ED),
                                     ),
                                   ),
                                   suffixIcon: IconButton(
@@ -288,15 +283,15 @@ class _LoginScreenState extends State<LoginScreen>
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
-                                      Color(0xFF667eea),
-                                      Color(0xFF764ba2),
+                                      Color(0xFF17324D),
+                                      Color(0xFF2F80ED),
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Color(
-                                        0xFF667eea,
+                                        0xFF2F80ED,
                                       ).withValues(alpha: 0.3),
                                       blurRadius: 8,
                                       offset: Offset(0, 4),
