@@ -140,11 +140,18 @@ class _BarangListScreenState extends State<BarangListScreen> {
                 ? TextField(
                   controller: _searchController,
                   autofocus: true,
-                  style: const TextStyle(color: Colors.white),
+                  cursorColor: const Color(0xFF2F80ED),
+                  style: const TextStyle(
+                    color: Color(0xFF17324D),
+                    fontSize: 16,
+                  ),
                   decoration: const InputDecoration(
                     hintText: 'Cari barang...',
-                    hintStyle: TextStyle(color: Colors.white70),
+                    hintStyle: TextStyle(color: Color(0xFF718191)),
+                    filled: true,
+                    fillColor: Colors.white,
                     border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12),
                   ),
                 )
                 : const Text(

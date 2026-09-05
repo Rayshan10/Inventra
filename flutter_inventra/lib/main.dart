@@ -104,6 +104,7 @@ class MyApp extends StatelessWidget {
           return VerifyOtpScreen(email: args['email']);
         },
         '/barang_list': (context) => BarangListScreen(),
+        '/barang': (context) => BarangListScreen(),
       },
       home: FutureBuilder(
         future: Provider.of<AuthService>(context, listen: false).initialize(),

@@ -295,9 +295,6 @@ function BarangManagement() {
                     {kategoriOptions.map((kat, idx) => (
                       <option key={idx} value={kat}>{kat}</option>
                     ))}
-                    <option value="Alat Tulis">Alat Tulis</option>
-                    <option value="Buku Tulis">Buku Tulis</option>
-                    <option value="Alat Gambar">Alat Gambar</option>
                   </select>
                 </div>
 

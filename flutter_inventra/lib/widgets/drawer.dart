@@ -31,7 +31,7 @@ class AppDrawer extends StatelessWidget {
             leading: Icon(Icons.inventory),
             title: Text('Barang'),
             onTap: () {
-              navigator.popAndPushNamed('/barang');
+              navigator.popAndPushNamed('/barang_list');
             },
           ),
           Divider(),
