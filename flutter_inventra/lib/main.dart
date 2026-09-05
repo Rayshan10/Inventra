@@ -6,6 +6,7 @@ import 'services/api_service.dart';
 import 'services/auth_service.dart';
 import 'screens/dashboard/barang_list.dart';
 import 'screens/dashboard/home.dart';
+import 'screens/dashboard/mutasi_screen.dart';
 import 'screens/auth/login.dart';
 import 'screens/auth/verify_otp.dart'; // Tambahkan import
 
@@ -105,6 +106,7 @@ class MyApp extends StatelessWidget {
         },
         '/barang_list': (context) => BarangListScreen(),
         '/barang': (context) => BarangListScreen(),
+        '/mutasi': (context) => const MutasiScreen(),
       },
       home: FutureBuilder(
         future: Provider.of<AuthService>(context, listen: false).initialize(),

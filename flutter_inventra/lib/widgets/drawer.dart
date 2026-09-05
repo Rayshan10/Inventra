@@ -34,6 +34,13 @@ class AppDrawer extends StatelessWidget {
               navigator.popAndPushNamed('/barang_list');
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.bar_chart),
+            title: const Text('Mutasi Stok'),
+            onTap: () {
+              navigator.popAndPushNamed('/mutasi');
+            },
+          ),
           Divider(),
           ListTile(
             leading: Icon(Icons.logout),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import '../models/barang.dart';
+import '../models/mutasi.dart';
 
 class ApiService {
   final String baseUrl;
@@ -94,6 +95,57 @@ class ApiService {
     }
 
     throw Exception('Gagal memuat statistik dashboard: ${response.statusCode}');
+  }
+
+  Future<List<Mutasi>> getMutasiList(String token) async {
+    final response = await client.get(
+      Uri.parse('$baseUrl/api/mutasi?limit=50'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body) as Map<String, dynamic>;
+      final data = responseData['data'] as List<dynamic>? ?? [];
+      return data
+          .map((item) => Mutasi.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+
+    throw Exception('Gagal memuat riwayat mutasi: ${response.statusCode}');
+  }
+
+  Future<Map<String, dynamic>> createMutasi({
+    required String barangId,
+    required String tipe,
+    required int jumlah,
+    required String keterangan,
+    required String tanggalMutasi,
+    required String token,
+  }) async {
+    final response = await client.post(
+      Uri.parse('$baseUrl/api/mutasi'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: json.encode({
+        'barang_id': barangId,
+        'tipe': tipe,
+        'jumlah': jumlah,
+        'keterangan': keterangan,
+        'tanggal_mutasi': tanggalMutasi,
+      }),
+    );
+
+    final responseData = json.decode(response.body) as Map<String, dynamic>;
+    if (response.statusCode == 201 && responseData['success'] == true) {
+      return responseData;
+    }
+
+    throw Exception(responseData['message'] ?? 'Gagal membuat mutasi stok');
   }
 
   Future<Barang> createBarang(Barang barang, String token) async {
