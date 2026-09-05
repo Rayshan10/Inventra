@@ -274,6 +274,30 @@ const String API_BASE_URL = 'http://localhost:3000/api';
 
 ## 🧪 Testing
 
+### Integration Test Backend
+
+Integration test mencakup login, CRUD barang, mutasi stok, dan export laporan.
+Jalankan dengan kredensial admin test melalui environment variable:
+
+```powershell
+cd backend_inventra
+$env:TEST_ADMIN_EMAIL='admin@example.com'
+$env:TEST_ADMIN_PASSWORD='password-test'
+npm test
+```
+
+Tanpa kedua variable tersebut, test akan dilewati agar tidak memakai kredensial produksi secara tidak sengaja.
+
+### Export Laporan
+
+Endpoint laporan barang tersedia di `GET /api/barang/export` dan membutuhkan header JWT:
+
+```text
+http://localhost:3000/api/barang/export
+```
+
+React menyediakan tombol **Unduh Laporan** pada dashboard dan menghasilkan file CSV.
+
 ### Manual API Testing dengan cURL
 
 ```bash

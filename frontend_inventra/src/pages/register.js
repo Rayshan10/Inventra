@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { BookOpen, Eye, EyeOff, LockKeyhole, Mail, UserRound, UserPlus } from 'lucide-react';
 import '../styles/formstyle.css';
 
 function Register() {
@@ -42,9 +43,10 @@ function Register() {
     return (
         <div className="login-page">
             <div className="login-card">
+                <div className="auth-brand-mark" aria-hidden="true"><BookOpen size={34} /></div>
                 <div className="login-header">
-                    <h2>Create Your Account</h2>
-                    <p>Fill in your details to get started</p>
+                    <h2>Daftar Akun</h2>
+                    <p>Buat akun baru untuk mulai mengelola inventaris</p>
                 </div>
 
                 {message && (
@@ -55,58 +57,65 @@ function Register() {
 
                 <form onSubmit={handleSubmit} className="login-form">
                     <div className="form-group">
-                        <label htmlFor="nama">Full Name</label>
-                        <input
-                            id="nama"
-                            type="text"
-                            placeholder="Enter your full name"
-                            value={form.nama}
-                            onChange={e => setForm({ ...form, nama: e.target.value })}
-                            required
-                            className="form-input"
-                        />
+                        <label htmlFor="nama">Nama Lengkap</label>
+                        <div className="input-with-icon">
+                            <UserRound size={18} className="field-icon" />
+                            <input
+                                id="nama"
+                                type="text"
+                                placeholder="Masukkan nama lengkap Anda"
+                                value={form.nama}
+                                onChange={e => setForm({ ...form, nama: e.target.value })}
+                                required
+                                className="form-input"
+                            />
+                        </div>
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="email">Email Address</label>
-                        <input
-                            id="email"
-                            type="email"
-                            placeholder="Enter your email"
-                            value={form.email}
-                            onChange={e => setForm({ ...form, email: e.target.value })}
-                            required
-                            className="form-input"
-                        />
+                        <label htmlFor="email">Email</label>
+                        <div className="input-with-icon">
+                            <Mail size={18} className="field-icon" />
+                            <input
+                                id="email"
+                                type="email"
+                                placeholder="Masukkan email Anda"
+                                value={form.email}
+                                onChange={e => setForm({ ...form, email: e.target.value })}
+                                required
+                                className="form-input"
+                            />
+                        </div>
                     </div>
 
                     <div className="form-group">
                         <label htmlFor="password">Password</label>
                         <div className="password-input-container">
+                            <LockKeyhole size={18} className="field-icon" />
                             <input
                                 id="password"
                                 type={passwordVisible ? "text" : "password"}
-                                placeholder="Create a password"
+                                placeholder="Buat password minimal 6 karakter"
                                 value={form.password}
                                 onChange={e => setForm({ ...form, password: e.target.value })}
                                 required
                                 className="form-input"
                             />
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 className="password-toggle"
                                 onClick={togglePasswordVisibility}
                                 aria-label={passwordVisible ? "Hide password" : "Show password"}
                             >
-                                {passwordVisible ? '🙈' : '👁️'}
+                                {passwordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
                         </div>
                     </div>
 
-                    
 
-                    <button 
-                        type="submit" 
+
+                    <button
+                        type="submit"
                         disabled={loading}
                         className="login-button"
                     >
@@ -116,13 +125,13 @@ function Register() {
                                 Creating account...
                             </>
                         ) : (
-                            'Register'
+                            <><UserPlus size={18} /> DAFTAR</>
                         )}
                     </button>
                 </form>
 
                 <div className="login-footer">
-                    <p>Already have an account? <a href="/" className="signup-link">Sign in</a></p>
+                    <p>Sudah punya akun? <a href="/" className="signup-link">Masuk</a></p>
                 </div>
             </div>
         </div>

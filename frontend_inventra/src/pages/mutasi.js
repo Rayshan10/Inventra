@@ -118,15 +118,6 @@ function MutasiStok() {
         }
     };
 
-    // Format currency
-    const formatCurrency = (value) => {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0
-        }).format(value);
-    };
-
     // Format date
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('id-ID', {
@@ -148,12 +139,6 @@ function MutasiStok() {
         };
         const badge = tipeBadges[tipe] || { label: tipe, class: 'badge-default' };
         return <span className={`badge ${badge.class}`}>{badge.label}</span>;
-    };
-
-    // Get barang name by id
-    const getBarangName = (barangId) => {
-        const barang = barangList.find(b => b._id === barangId);
-        return barang ? barang.nama_barang : 'N/A';
     };
 
     return (

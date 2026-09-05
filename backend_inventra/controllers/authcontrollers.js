@@ -2,6 +2,7 @@ const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const sendEmailVerification = require('../utils/sendemail'); // pastikan ini benar
+const OTP_VALIDITY_MS = 5 * 60 * 1000;
 
 // Register
 exports.register = async (req, res) => {
@@ -37,7 +38,8 @@ exports.register = async (req, res) => {
             email,
             password: hashedPassword,
             verified: false,
-            otp_code: otp
+            otp_code: otp,
+            otp_expires_at: new Date(Date.now() + OTP_VALIDITY_MS)
         });
 
         await user.save();
@@ -94,13 +96,21 @@ exports.verifyOtp = async (req, res) => {
         if (!user.otp_code || user.otp_code.toString() !== otp.toString()) {
             return res.status(400).json({
                 success: false,
-                message: 'Kode OTP salah atau expired'
+                message: 'Kode OTP salah'
+            });
+        }
+
+        if (!user.otp_expires_at || user.otp_expires_at.getTime() <= Date.now()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Kode OTP sudah kadaluarsa'
             });
         }
 
         // Update status verifikasi
         user.verified = true;
         user.otp_code = null; // Clear OTP
+        user.otp_expires_at = null;
         await user.save();
 
         res.status(200).json({
@@ -154,6 +164,7 @@ exports.resendOtp = async (req, res) => {
         // Generate OTP baru
         const newOtp = Math.floor(100000 + Math.random() * 900000);
         user.otp_code = newOtp;
+        user.otp_expires_at = new Date(Date.now() + OTP_VALIDITY_MS);
         await user.save();
 
         // Kirim email

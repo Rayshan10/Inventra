@@ -27,7 +27,8 @@ exports.createMutasi = async (req, res) => {
             });
         }
 
-        if (jumlah <= 0) {
+        const jumlahNumber = Number(jumlah);
+        if (!Number.isFinite(jumlahNumber) || jumlahNumber <= 0) {
             return res.status(400).json({
                 success: false,
                 message: 'Jumlah harus lebih besar dari 0'
@@ -42,8 +43,8 @@ exports.createMutasi = async (req, res) => {
             });
         }
 
-        // Cari barang
-        const barang = await Barang.findById(barang_id);
+        // Baca data untuk validasi dan membentuk histori mutasi.
+        const barang = await Barang.findById(barang_id).lean();
         if (!barang) {
             return res.status(404).json({
                 success: false,
@@ -51,38 +52,59 @@ exports.createMutasi = async (req, res) => {
             });
         }
 
-        // Hitung stok baru
-        let stok_baru = barang.stok;
-        if (tipe === 'masuk' || tipe === 'retur') {
-            stok_baru += jumlah;
-        } else if (tipe === 'keluar' || tipe === 'opname') {
-            stok_baru -= jumlah;
-            // Validasi stok tidak boleh negatif
-            if (stok_baru < 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: `Stok tidak cukup. Stok saat ini: ${barang.stok}, diminta keluar: ${jumlah}`
-                });
-            }
+        const isIncoming = tipe === 'masuk' || tipe === 'retur';
+        const stockDelta = isIncoming ? jumlahNumber : -jumlahNumber;
+        const stokSebelum = barang.stok;
+        const stokSesudah = stokSebelum + stockDelta;
+
+        if (stokSesudah < 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Stok tidak cukup. Stok saat ini: ${stokSebelum}, diminta keluar: ${jumlahNumber}`
+            });
         }
 
-        // Buat record mutasi
+        // Hanya request yang masih melihat stok lama yang boleh berhasil.
+        // Ini mencegah dua request bersamaan memakai stok_sebelum yang sama.
+        const stockFilter = isIncoming
+            ? { _id: barang_id }
+            : { _id: barang_id, stok: { $gte: jumlahNumber } };
+        const updatedBarang = await Barang.findOneAndUpdate(
+            stockFilter,
+            { $inc: { stok: stockDelta } },
+            { new: true, runValidators: true }
+        ).lean();
+
+        if (!updatedBarang) {
+            return res.status(409).json({
+                success: false,
+                message: 'Stok berubah atau tidak cukup. Silakan muat ulang data dan coba lagi.'
+            });
+        }
+
+        const actualStokSesudah = updatedBarang.stok;
+        const actualStokSebelum = actualStokSesudah - stockDelta;
         const mutasi = new MutasiStok({
             barang_id,
             tipe,
-            jumlah,
-            keterangan,
-            stok_sebelum: barang.stok,
-            stok_sesudah: stok_baru,
+            jumlah: jumlahNumber,
+            keterangan: keterangan.trim(),
+            stok_sebelum: actualStokSebelum,
+            stok_sesudah: actualStokSesudah,
             created_by: user_id,
             tanggal_mutasi: tanggal_mutasi || Date.now()
         });
 
-        await mutasi.save();
-
-        // Update stok barang
-        barang.stok = stok_baru;
-        await barang.save();
+        try {
+            await mutasi.save();
+        } catch (historyError) {
+            // Batalkan perubahan hanya bila belum ada mutasi lain setelah update ini.
+            await Barang.findOneAndUpdate(
+                { _id: barang_id, stok: actualStokSesudah },
+                { $inc: { stok: -stockDelta } }
+            );
+            throw historyError;
+        }
 
         // Return dengan data mutasi & barang terbaru
         res.status(201).json({
@@ -101,9 +123,9 @@ exports.createMutasi = async (req, res) => {
                     created_at: mutasi.created_at
                 },
                 barang: {
-                    _id: barang._id,
-                    nama_barang: barang.nama_barang,
-                    stok: barang.stok
+                    _id: updatedBarang._id,
+                    nama_barang: updatedBarang.nama_barang,
+                    stok: updatedBarang.stok
                 }
             }
         });

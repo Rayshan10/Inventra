@@ -31,12 +31,13 @@ class AuthService with ChangeNotifier {
         }
       }
 
-      if (_token != null &&
-          _token!.isNotEmpty &&
-          (_user == null || !_user!.isValid())) {
+      if (_token != null && _token!.isNotEmpty) {
         final profileData = await _apiService.getProfile(_token!);
         _user = User.fromJson(profileData);
         await prefs.setString('user', json.encode(_user!.toJson()));
+      } else {
+        _token = null;
+        _user = null;
       }
 
       _isInitialized = true;

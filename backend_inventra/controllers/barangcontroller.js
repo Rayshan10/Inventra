@@ -48,6 +48,36 @@ exports.getAllBarang = async (req, res) => {
   }
 };
 
+// Export laporan barang dalam format CSV
+exports.exportBarangCsv = async (req, res) => {
+  try {
+    const data = await Barang.find().sort({ kode_barang: 1 }).lean();
+    const escapeCsv = (value) => {
+      const text = value == null ? '' : String(value);
+      return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    };
+    const rows = [
+      ['Kode Barang', 'Nama Barang', 'Kategori', 'Harga Satuan', 'Harga Pak', 'Stok', 'Tanggal'],
+      ...data.map((barang) => [
+        barang.kode_barang,
+        barang.nama_barang,
+        barang.kategori,
+        barang.harga_satuan,
+        barang.harga_pak,
+        barang.stok,
+        barang.tgljam ? new Date(barang.tgljam).toISOString() : ''
+      ])
+    ];
+    const csv = rows.map((row) => row.map(escapeCsv).join(',')).join('\n');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="laporan-barang.csv"');
+    res.send(`\ufeff${csv}`);
+  } catch (err) {
+    console.error('Error export barang:', err);
+    res.status(500).json({ success: false, message: 'Gagal mengekspor laporan barang' });
+  }
+};
+
 // Tambah barang baru
 exports.createBarang = async (req, res) => {
   try {

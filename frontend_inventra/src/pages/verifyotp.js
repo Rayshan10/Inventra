@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { BookOpen, KeyRound, MailCheck, ShieldCheck } from 'lucide-react';
 import '../styles/formstyle.css';
 
 function VerifyOtp() {
@@ -16,7 +17,7 @@ function VerifyOtp() {
     useEffect(() => {
         const storedEmail = localStorage.getItem('pending_email');
         if (storedEmail) setEmail(storedEmail);
-        
+
         // Start countdown for resend OTP
         const timer = setInterval(() => {
             setCountdown((prev) => {
@@ -63,7 +64,7 @@ function VerifyOtp() {
             const res = await axios.post('/api/auth/resend', { email });
             setMessage(res.data.message);
             setError(false);
-            
+
             // Start countdown again
             const timer = setInterval(() => {
                 setCountdown((prev) => {
@@ -87,9 +88,10 @@ function VerifyOtp() {
     return (
         <div className="login-page">
             <div className="login-card">
+                <div className="auth-brand-mark" aria-hidden="true"><BookOpen size={34} /></div>
                 <div className="login-header">
-                    <h2>Verify Your Account</h2>
-                    <p>Enter the OTP sent to your email</p>
+                    <h2>Verifikasi OTP</h2>
+                    <p>Masukkan kode 6 digit yang dikirim ke email Anda</p>
                 </div>
 
                 {message && (
@@ -100,36 +102,42 @@ function VerifyOtp() {
 
                 <form onSubmit={handleSubmit} className="login-form">
                     <div className="form-group">
-                        <label htmlFor="email">Registered Email</label>
-                        <input
-                            id="email"
-                            type="email"
-                            placeholder="Your registered email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            className="form-input"
-                        />
+                        <label htmlFor="email">Email Terdaftar</label>
+                        <div className="input-with-icon">
+                            <MailCheck size={18} className="field-icon" />
+                            <input
+                                id="email"
+                                type="email"
+                                placeholder="Masukkan email terdaftar"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                className="form-input"
+                            />
+                        </div>
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="otp">Verification Code</label>
-                        <input
-                            id="otp"
-                            type="text"
-                            placeholder="Enter 6-digit OTP"
-                            value={otp}
-                            onChange={(e) => setOtp(e.target.value)}
-                            required
-                            className="form-input"
-                            maxLength="6"
-                            pattern="\d{6}"
-                            inputMode="numeric"
-                        />
+                        <label htmlFor="otp">Kode OTP</label>
+                        <div className="input-with-icon">
+                            <KeyRound size={18} className="field-icon" />
+                            <input
+                                id="otp"
+                                type="text"
+                                placeholder="Masukkan kode 6 digit"
+                                value={otp}
+                                onChange={(e) => setOtp(e.target.value)}
+                                required
+                                className="form-input"
+                                maxLength="6"
+                                pattern="\d{6}"
+                                inputMode="numeric"
+                            />
+                        </div>
                     </div>
 
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         disabled={loading}
                         className="login-button"
                     >
@@ -139,24 +147,24 @@ function VerifyOtp() {
                                 Verifying...
                             </>
                         ) : (
-                            'Verify Account'
+                            <><ShieldCheck size={18} /> VERIFIKASI</>
                         )}
                     </button>
                 </form>
 
                 <div className="otp-resend">
-                    <p>Didn't receive the code?</p>
-                    <button 
-                        onClick={handleResend} 
+                    <p>Belum menerima kode?</p>
+                    <button
+                        onClick={handleResend}
                         disabled={loading || resendDisabled}
                         className="resend-button"
                     >
-                        {resendDisabled ? `Resend OTP (${countdown}s)` : 'Resend OTP'}
+                        {resendDisabled ? `Kirim ulang (${countdown} dtk)` : 'Kirim ulang OTP'}
                     </button>
                 </div>
 
                 <div className="login-footer">
-                    <p><a href="/" className="signup-link">Back to Login</a></p>
+                    <p><a href="/" className="signup-link">Kembali ke login</a></p>
                 </div>
             </div>
         </div>

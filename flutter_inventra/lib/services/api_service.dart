@@ -148,6 +148,20 @@ class ApiService {
     throw Exception(responseData['message'] ?? 'Gagal membuat mutasi stok');
   }
 
+  Future<String> exportBarangCsv(String token) async {
+    final response = await client.get(
+      Uri.parse('$baseUrl/api/barang/export'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'text/csv'},
+    );
+
+    if (response.statusCode == 200 &&
+        (response.headers['content-type'] ?? '').contains('text/csv')) {
+      return response.body;
+    }
+
+    throw Exception('Gagal mengunduh laporan barang');
+  }
+
   Future<Barang> createBarang(Barang barang, String token) async {
     try {
       final response = await client.post(
@@ -272,7 +286,7 @@ class ApiService {
   // In your api_service.dart file
   Future<Map<String, dynamic>> resendOTP(String email) async {
     final response = await client.post(
-      Uri.parse('$baseUrl/api/auth/resend-otp'),
+      Uri.parse('$baseUrl/api/auth/resend'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'email': email}),
     );

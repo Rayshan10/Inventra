@@ -5,12 +5,13 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     created_at: { type: Date, default: Date.now },
-    verified: {type: Boolean,default: false},
-    otp_code: {type: String}
-}, 
+    verified: { type: Boolean, default: false },
+    otp_code: { type: String },
+    otp_expires_at: { type: Date }
+},
 
-{
-    collection: 'users'
-});
+    {
+        collection: 'users'
+    });
 
 module.exports = mongoose.model('User', userSchema);
